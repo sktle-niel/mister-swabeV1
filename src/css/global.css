@@ -71,6 +71,8 @@ header {
   gap: 20px;
   align-items: center;
   position: relative;
+  min-width: 140px;
+  justify-content: flex-end;
 }
 
 .icon-link {
@@ -84,6 +86,7 @@ header {
   cursor: pointer;
   position: relative;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .icon-link svg {
@@ -98,20 +101,24 @@ header {
   stroke: #ffd700;
 }
 
-/* Search Bar Animation */
+/* Search Bar Animation - FIXED */
 .search-container {
   position: absolute;
-  right: 0;
+  right: 80px; /* Position to the left of the icons */
   top: 50%;
   transform: translateY(-50%);
   width: 0;
   overflow: hidden;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 5;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .search-container.active {
   width: 300px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .search-input {
@@ -168,6 +175,16 @@ header {
 
 .search-container.active .search-icon-animated {
   animation: none;
+}
+
+/* Hide search icon when search is active */
+.icon-link.search-icon-animated {
+  transition: opacity 0.3s;
+}
+
+.search-container.active ~ .icon-link.search-icon-animated {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Navigation */
@@ -668,6 +685,14 @@ footer {
   .category-banners {
     grid-template-columns: 1fr;
   }
+
+  .search-container {
+    right: 120px;
+  }
+
+  .search-container.active {
+    width: 250px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -692,6 +717,19 @@ footer {
     grid-template-columns: 1fr;
     gap: 40px;
   }
+
+  .header-icons {
+    gap: 15px;
+    min-width: 120px;
+  }
+
+  .search-container {
+    right: 100px;
+  }
+
+  .search-container.active {
+    width: 200px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -705,5 +743,22 @@ footer {
 
   .newsletter-form {
     flex-direction: column;
+  }
+
+  .header-container {
+    padding: 20px 20px;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  .search-container {
+    right: 80px;
+  }
+
+  .search-container.active {
+    width: calc(100vw - 180px);
+    max-width: 250px;
   }
 }

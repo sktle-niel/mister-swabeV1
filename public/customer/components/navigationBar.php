@@ -4,6 +4,9 @@
   .nav-container a{
     color: #fff !important;
   }
+  
+
+  
 </style>
 
 <div class="announcement-bar">
@@ -59,7 +62,7 @@
           <path d="m21 21-4.35-4.35"></path>
         </svg>
       </a>
-      <a href="#" class="icon-link" title="Account">
+      <a href="../../../auth/form.php" class="icon-link" title="Account">
         <svg
           width="20"
           height="20"
