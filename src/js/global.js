@@ -27,7 +27,7 @@ searchInput.addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
     const query = searchInput.value.trim();
     if (query) {
-      window.location.href = `products.php?search=${encodeURIComponent(query)}`;
+      window.location.href = `${window.location.origin}/public/customer/main.php?page=products&search=${encodeURIComponent(query)}`;
     }
   }
 });
