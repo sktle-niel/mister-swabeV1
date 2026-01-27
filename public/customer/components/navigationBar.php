@@ -7,15 +7,14 @@
 </style>
 
 <div class="announcement-bar">
-  FREE SHIPPING ON ORDERS OVER ₱999 | QUEZON CITY: 1-2 DAYS | NATIONWIDE:
-  3-5 DAYS
+  RIZAL AVENUE, PUERTO PRINCESA CITY, PALAWAN. 5300 | ALWAYS OPEN 9:00 AM - 8:00 PM 
 </div>
 
 <!-- Header -->
 <header>
   <div class="header-container">
     <div class="logo-section">
-      <a href="#" class="logo">SWABE COLLECTION</a>
+      <a href="/public/customer/main.php?page=home" class="logo">SWABE COLLECTION</a>
       <div class="tagline">Your Style, Your Way</div>
     </div>
     <div class="header-icons">
@@ -96,11 +95,11 @@
 <!-- Navigation -->
 <nav>
   <div class="nav-container">
-    <a href="products.php?category=new-arrivals" class="nav-link">New Arrivals</a>
-    <a href="products.php?category=shoes" class="nav-link">Shoes</a>
-    <a href="products.php?category=shirts" class="nav-link">Shirts</a>
-    <a href="products.php?category=collections" class="nav-link">Collections</a>
-    <a href="products.php?category=accessories" class="nav-link">Accessories</a>
-    <a href="products.php?category=sale" class="nav-link">Sale</a>
+    <a href="/public/customer/main.php?page=products&category=new-arrivals" class="nav-link">New Arrivals</a>
+    <a href="/public/customer/main.php?page=products&category=shoes" class="nav-link">Shoes</a>
+    <a href="/public/customer/main.php?page=products&category=shirts" class="nav-link">Shirts</a>
+    <a href="/public/customer/main.php?page=products&category=collections" class="nav-link">Collections</a>
+    <a href="/public/customer/main.php?page=products&category=accessories" class="nav-link">Accessories</a>
+    <a href="/public/customer/main.php?page=products&category=sale" class="nav-link">Sale</a>
   </div>
 </nav>
