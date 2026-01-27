@@ -1,6 +1,10 @@
-# TODO List for Modifying Customer Main Page
+# TODO: Make Product Modal Dynamic
 
-- [x] Update public/customer/main.php to include HTML structure, navigationBar, switch statement for including pages, footer, and scripts
-- [x] Modify public/customer/pages/home.php to contain only content sections (remove HTML structure, navigationBar, footer, scripts)
-- [x] Modify public/customer/pages/products.php to contain only content sections (remove HTML structure, navigationBar, footer, scripts)
-- [x] Test navigation between pages to ensure correct functionality (fixed navigation links to use main.php)
+## Steps to Complete
+
+- [x] Edit productModal.php: Remove dummy data and add IDs for dynamic elements (e.g., id="productTitle", id="productPrice", id="mainImage"). Ensure modal starts hidden (display: none). Add JavaScript function to open modal with data.
+- [x] Edit products.php: Change product cards to divs/buttons with onclick="openModal(this)". Add data attributes (data-name, data-price, data-image, data-sizes) to cards.
+- [x] Edit home.php: Change product cards to divs/buttons with onclick="openModal(this)". Add data attributes (data-name, data-price, data-image, data-sizes) to cards.
+- [x] Add JavaScript: Implement openModal function to populate modal from card data, including dynamic size options.
+- [x] Include productModal.php in main.php to load the modal component on the page.
+- [x] Test modal functionality: Click on a product card in products.php or home.php to open the modal with the correct data, including sizes.

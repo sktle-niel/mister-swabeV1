@@ -20,6 +20,7 @@
         'brand' => 'Sneakers',
         'name' => 'Classic Running Shoes',
         'price' => '₱1,299',
+        'sizes' => '31,32,33,34,35,40,41,42',
         'category' => 'shoes'
       ],
       [
@@ -27,6 +28,7 @@
         'brand' => 'T-Shirts',
         'name' => 'Premium Cotton Tee',
         'price' => '₱349 <span class="product-price-old">₱599</span>',
+        'sizes' => 'Small,Medium,Large',
         'category' => 'shirts'
       ],
       [
@@ -34,6 +36,7 @@
         'brand' => 'Sneakers',
         'name' => 'Street Style Kicks',
         'price' => '₱1,899',
+        'sizes' => '33,36,39,42',
         'category' => 'shoes'
       ],
       [
@@ -41,6 +44,7 @@
         'brand' => 'Shirts',
         'name' => 'Casual Button Down',
         'price' => '₱799',
+        'sizes' => 'Small,Medium,Large,X-Large',
         'category' => 'shirts'
       ],
       [
@@ -48,6 +52,7 @@
         'brand' => 'Sneakers',
         'name' => 'High-Top Sneakers',
         'price' => '₱1,599',
+        'sizes' => '31,32,33,34,35,36,37',
         'category' => 'shoes'
       ],
       [
@@ -55,6 +60,7 @@
         'brand' => 'T-Shirts',
         'name' => 'Graphic Print Tee',
         'price' => '₱449',
+        'sizes' => 'Small,Medium,Large,X-Large',
         'category' => 'shirts'
       ],
       [
@@ -62,6 +68,7 @@
         'brand' => 'Sneakers',
         'name' => 'Retro Runners',
         'price' => '₱999 <span class="product-price-old">₱1,599</span>',
+        'sizes' => '31,34,37,40,42',
         'category' => 'shoes'
       ],
       [
@@ -69,6 +76,7 @@
         'brand' => 'Shirts',
         'name' => 'Polo Shirt Classic',
         'price' => '₱649',
+        'sizes' => 'Small,Medium,Large,X-Large',
         'category' => 'shirts'
       ],
       [
@@ -90,6 +98,7 @@
         'brand' => 'Collections',
         'name' => 'Summer Collection Tee',
         'price' => '₱399',
+        'sizes' => 'Small,Medium,Large,X-Large',
         'category' => 'collections'
       ],
       [
@@ -97,6 +106,7 @@
         'brand' => 'Collections',
         'name' => 'Urban Style Sneakers',
         'price' => '₱1,299',
+        'sizes' => '33,36,39,42',
         'category' => 'collections'
       ],
       [
@@ -109,8 +119,9 @@
       [
         'image' => 'https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=400&h=400&fit=crop&q=90',
         'brand' => 'New Arrivals',
-        'name' => 'Latest Sneaker Drop',
+        'name' => 'Latest Sneakers Drop',
         'price' => '₱1,799',
+        'sizes' => '32,35,38,41',
         'category' => 'new-arrivals'
       ]
     ];
@@ -119,14 +130,14 @@
       $matchesCategory = $category === 'all' || $product['category'] === $category;
       $matchesSearch = !$search || stripos($product['name'], $search) !== false || stripos($product['brand'], $search) !== false;
       if ($matchesCategory && $matchesSearch) {
-        echo '<a href="#" class="product-card">';
+        echo '<div class="product-card" onclick="openModal(this)" data-name="' . htmlspecialchars($product['name']) . '" data-price="' . htmlspecialchars($product['price']) . '" data-image="' . htmlspecialchars($product['image']) . '" data-sizes="' . htmlspecialchars($product['sizes'] ?? '') . '">';
         echo '<img src="' . $product['image'] . '" class="product-image" alt="Product" />';
         echo '<div class="product-info">';
         echo '<p class="product-brand">' . $product['brand'] . '</p>';
         echo '<h3 class="product-name">' . $product['name'] . '</h3>';
         echo '<p class="product-price">' . $product['price'] . '</p>';
         echo '</div>';
-        echo '</a>';
+        echo '</div>';
       }
     }
     ?>
