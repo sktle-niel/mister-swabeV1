@@ -19,7 +19,7 @@ function openModal(card) {
     sizeOptionsContainer.innerHTML = ""; // Clear existing options
 
     const sizeArray = sizes.split(",");
-    sizeArray.forEach((size) => {
+    sizeArray.forEach((size, index) => {
       const sizeButton = document.createElement("button");
       sizeButton.className = "size-option";
       sizeButton.textContent = size.trim();
@@ -27,12 +27,23 @@ function openModal(card) {
         selectSize(this);
       };
       sizeOptionsContainer.appendChild(sizeButton);
+
+      // Auto-select first size option
+      if (index === 0) {
+        selectSize(sizeButton);
+      }
     });
   } else {
     sizeSection.style.display = "none"; // Hide size section for accessories
   }
 
   document.getElementById("modalOverlay").style.display = "flex";
+
+  // Auto-select first color option
+  const firstColorOption = document.querySelector(".color-option");
+  if (firstColorOption) {
+    selectColor(firstColorOption);
+  }
 }
 
 function closeModal() {
@@ -79,8 +90,15 @@ function addToCart() {
   const size = document.querySelector(".size-option.selected");
   const color = document.querySelector(".color-option.selected");
   const quantity = document.getElementById("quantityInput").value;
+  const name = document.getElementById("productTitle").textContent;
+  const price = document.getElementById("productPrice").textContent;
+  const image = document.getElementById("mainImage").src;
 
-  if (!size) {
+  // Check if size section is visible (only require size if sizes are available)
+  const sizeSection = document.querySelector(".size-section");
+  const isSizeRequired = sizeSection && sizeSection.style.display !== "none";
+
+  if (isSizeRequired && !size) {
     alert("Please select a size");
     return;
   }
@@ -90,8 +108,34 @@ function addToCart() {
     return;
   }
 
-  alert(`Added ${quantity} item(s) in size ${size.textContent} to cart!`);
+  // Get existing cart from localStorage or initialize empty array
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  // Create cart item object
+  const cartItem = {
+    id: Date.now(), // Simple unique ID
+    name: name,
+    price: price,
+    image: image,
+    size: size ? size.textContent : "N/A",
+    color: color.textContent,
+    quantity: parseInt(quantity),
+  };
+
+  // Add item to cart (latest first)
+  cart.unshift(cartItem);
+
+  // Save back to localStorage
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  const sizeText = size ? ` in size ${size.textContent}` : "";
+  alert(`Added ${quantity} item(s)${sizeText} to cart!`);
   closeModal();
+
+  // Refresh cart if it's open
+  if (typeof refreshCart === "function") {
+    refreshCart();
+  }
 }
 
 // Keyboard shortcut to close modal (ESC key)
