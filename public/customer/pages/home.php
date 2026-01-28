@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-Commerce Store - Product Pagination</title>
-</head>
-<body>
 
   <!-- Hero Slider -->
   <div class="hero-slider">
@@ -259,5 +251,3 @@
   </section>
 
   <script src="../../../src/js/homeLoadMore.js"></script>
-</body>
-</html>
