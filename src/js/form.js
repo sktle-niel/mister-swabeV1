@@ -10,6 +10,8 @@ function showLoginForm() {
   initialView.classList.add("hidden");
   loginFormView.classList.remove("hidden");
   loginFormView.classList.add("fade-in");
+
+  updateURL("login");
 }
 
 function showInitialView() {
@@ -58,16 +60,24 @@ function backToLogin() {
   loginFormView.classList.add("fade-in");
 }
 
-function handleEmailContinue(event) {
-  event.preventDefault();
+function showInvalidMessage(message) {
+  const invalidMessage = document.getElementById("invalidMessage");
+  const invalidText = document.querySelector(".invalid-text");
+  invalidText.textContent = message;
+  invalidMessage.style.display = "block";
+  setTimeout(() => {
+    invalidMessage.style.display = "none";
+  }, 3000);
+}
 
+function handleEmailContinue() {
   const emailInput = document.getElementById("emailOnly");
   const email = emailInput.value.trim();
 
   // Check if email is a valid Gmail
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if (!gmailRegex.test(email)) {
-    alert("Please enter a valid Gmail address.");
+    showInvalidMessage("Please enter a valid Gmail address.");
     return;
   }
 
@@ -97,6 +107,7 @@ function showCreatePasswordView(email) {
   // Store email for later use
   if (email) {
     createPasswordView.setAttribute("data-email", email);
+    document.getElementById("createEmailHidden").value = email;
   }
 
   // Change header text
@@ -107,6 +118,18 @@ function showCreatePasswordView(email) {
   initialView.classList.add("hidden");
   createPasswordView.classList.remove("hidden");
   createPasswordView.classList.add("fade-in");
+
+  updateURL("create");
+}
+
+function showInvalidMessage(message) {
+  const invalidMessage = document.getElementById("invalidMessage");
+  const invalidText = document.querySelector(".invalid-text");
+  invalidText.textContent = message;
+  invalidMessage.style.display = "block";
+  setTimeout(() => {
+    invalidMessage.style.display = "none";
+  }, 3000);
 }
 
 function handleCreatePassword(event) {
@@ -141,6 +164,24 @@ function handleCreatePassword(event) {
   const createPasswordView = document.getElementById("createPasswordView");
   const email = createPasswordView.getAttribute("data-email");
 
-  // If all validations pass
-  alert("Account created successfully!\nEmail: " + email);
+  // Check if email already exists
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", "../back-end/read/checkEmail.php", true);
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      const response = JSON.parse(xhr.responseText);
+      if (response.exists) {
+        showInvalidMessage("Email already exists.");
+        return;
+      } else {
+        // Submit the form
+        document
+          .getElementById("createPasswordView")
+          .querySelector("form")
+          .submit();
+      }
+    }
+  };
+  xhr.send("email=" + encodeURIComponent(email));
 }
