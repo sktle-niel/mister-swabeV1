@@ -1,8 +1,6 @@
-# TODO: Fix Load More Products Issue in products.php
+# TODO: Implement Temporary Cart Functionality
 
-## Steps to Complete
-
-- [x] Analyze the issue: Load more state persists across pages, requiring re-click after navigation.
-- [x] Compare with homeLoadMore.js: It resets state on page change using lastPage in localStorage.
-- [x] Edit productsLoadMore.js: Add page tracking logic to check current page vs stored lastPage, reset currentlyShown to 0 if different, update lastPage, and show initial products.
-- [x] Test the fix: Navigate between pages and verify load more works without extra clicks.
+- [ ] Update `addToCart()` in `src/js/modal.js` to collect product data and save to localStorage
+- [ ] Modify `loadCartContent()` in `public/customer/components/userCart.php` to read from localStorage and generate cart HTML
+- [ ] Test adding items to cart and viewing in cart sidebar
+- [ ] Ensure cart persists across page reloads

@@ -43,30 +43,94 @@
 
     function loadCartContent() {
         const cartContent = document.getElementById('cartContent');
-        
-        // Show loading state
-        cartContent.innerHTML = '<div class="cart-loading"><div class="cart-loading-spinner"></div></div>';
-        
-        // Fetch cart content
-        fetch('/userCart.php')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load cart');
-                }
-                return response.text();
-            })
-            .then(html => {
-                cartContent.innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Error loading cart:', error);
-                cartContent.innerHTML = `
-                    <div class="cart-error">
-                        <p>Failed to load cart. Please try again.</p>
-                        <button class="cart-retry-btn" onclick="loadCartContent()">Retry</button>
+
+        // Get cart from localStorage
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        if (cart.length === 0) {
+            cartContent.innerHTML = `
+                <div class="cart-empty">
+                    <p>Your cart is empty</p>
+                    <p>Add some products to get started!</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Generate cart HTML
+        let cartHTML = '<div class="cart-items">';
+
+        cart.forEach(item => {
+            // Extract numeric price (remove ₱ and handle old price if present)
+            const priceMatch = item.price.match(/₱([\d,]+)/);
+            const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '')) : 0;
+
+            cartHTML += `
+                <div class="cart-item" data-id="${item.id}">
+                    <div class="cart-item-image-container">
+                        <img src="${item.image}" alt="${item.name}" class="cart-item-image">
                     </div>
-                `;
-            });
+                    <div class="cart-item-content">
+                        <div class="cart-item-header">
+                            <h4 class="cart-item-name">${item.name}</h4>
+                            <button class="cart-item-remove" onclick="removeCartItem(${item.id})" title="Remove item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="cart-item-details">
+                            <span class="cart-item-variant">Size: ${item.size}</span>
+                            <span class="cart-item-variant">Color: ${item.color}</span>
+                        </div>
+                        <div class="cart-item-footer">
+                            <div class="cart-item-price">${item.price}</div>
+                            <div class="cart-item-quantity-controls">
+                                <button class="quantity-btn quantity-decrease" onclick="updateCartItemQuantity(${item.id}, ${item.quantity - 1})" ${item.quantity <= 1 ? 'disabled' : ''}>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                                <span class="quantity-value">${item.quantity}</span>
+                                <button class="quantity-btn quantity-increase" onclick="updateCartItemQuantity(${item.id}, ${item.quantity + 1})">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        cartHTML += '</div>';
+
+        cartContent.innerHTML = cartHTML;
+    }
+
+    // Function to update item quantity
+    function updateCartItemQuantity(itemId, newQuantity) {
+        if (newQuantity < 1) return;
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const itemIndex = cart.findIndex(item => item.id === itemId);
+
+        if (itemIndex !== -1) {
+            cart[itemIndex].quantity = newQuantity;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            loadCartContent(); // Refresh cart display
+        }
+    }
+
+    // Function to remove item from cart
+    function removeCartItem(itemId) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart = cart.filter(item => item.id !== itemId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        loadCartContent(); // Refresh cart display
     }
 
     // Add click event to cart icon when DOM is ready
