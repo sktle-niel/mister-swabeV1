@@ -129,7 +129,7 @@ function addToCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
 
   const sizeText = size ? ` in size ${size.textContent}` : "";
-  alert(`Added ${quantity} item(s)${sizeText} to cart!`);
+  showSuccessMessage(`Added ${quantity} item(s)${sizeText} to cart!`);
   closeModal();
 
   // Refresh cart if it's open
@@ -144,3 +144,14 @@ document.addEventListener("keydown", function (event) {
     closeModal();
   }
 });
+
+// Show success message
+function showSuccessMessage(message) {
+  const successMessage = document.getElementById("successMessage");
+  const successText = document.querySelector(".success-text");
+  successText.textContent = message;
+  successMessage.style.display = "flex";
+  setTimeout(() => {
+    successMessage.style.display = "none";
+  }, 3000); // Hide after 3 seconds
+}

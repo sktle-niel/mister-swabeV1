@@ -34,6 +34,7 @@ $currentPage = isset($_GET['page']) ? $_GET['page'] : 'home';
     <?php include 'components/footer.php'; ?>
     <?php include 'components/userCart.php'; ?>
     <?php include 'components/productModal.php'; ?>
+    <?php include 'components/successStatus.php'; ?>
 
     <script src="../../../src/js/global.js"></script>
     <script src="../../../src/js/bootstrap.bundle.min.js"></script>
