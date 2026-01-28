@@ -4,6 +4,13 @@ const searchContainer = document.getElementById("searchContainer");
 const searchInput = document.getElementById("searchInput");
 const searchClose = document.getElementById("searchClose");
 
+console.log("Search elements found:", {
+  searchIcon,
+  searchContainer,
+  searchInput,
+  searchClose,
+});
+
 searchIcon.addEventListener("click", function (e) {
   e.preventDefault();
   searchContainer.classList.add("active");

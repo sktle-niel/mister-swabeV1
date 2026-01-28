@@ -4,11 +4,9 @@ function showLoginForm() {
   const headerTitle = document.getElementById("headerTitle");
   const headerSubtitle = document.getElementById("headerSubtitle");
 
-  // Change header text
   headerTitle.textContent = "Login";
   headerSubtitle.textContent = "Enter username and password";
 
-  // Switch views
   initialView.classList.add("hidden");
   loginFormView.classList.remove("hidden");
   loginFormView.classList.add("fade-in");
@@ -17,15 +15,17 @@ function showLoginForm() {
 function showInitialView() {
   const initialView = document.getElementById("initialView");
   const loginFormView = document.getElementById("loginFormView");
+  const createPasswordView = document.getElementById("createPasswordView");
+  const forgotPasswordView = document.getElementById("forgotPasswordView");
   const headerTitle = document.getElementById("headerTitle");
   const headerSubtitle = document.getElementById("headerSubtitle");
 
-  // Reset header text
   headerTitle.textContent = "Sign in";
   headerSubtitle.innerHTML = 'Sign in or <a href="#">create an account</a>';
 
-  // Switch views
   loginFormView.classList.add("hidden");
+  createPasswordView.classList.add("hidden");
+  forgotPasswordView.classList.add("hidden");
   initialView.classList.remove("hidden");
   initialView.classList.add("fade-in");
 }
@@ -36,11 +36,9 @@ function showForgotPassword() {
   const headerTitle = document.getElementById("headerTitle");
   const headerSubtitle = document.getElementById("headerSubtitle");
 
-  // Change header text
   headerTitle.textContent = "Forgot Password";
   headerSubtitle.textContent = "Reset your password";
 
-  // Switch views
   loginFormView.classList.add("hidden");
   forgotPasswordView.classList.remove("hidden");
   forgotPasswordView.classList.add("fade-in");
@@ -52,11 +50,9 @@ function backToLogin() {
   const headerTitle = document.getElementById("headerTitle");
   const headerSubtitle = document.getElementById("headerSubtitle");
 
-  // Change header text back to login
   headerTitle.textContent = "Login";
-  headerSubtitle.textContent = "Login your account";
+  headerSubtitle.textContent = "Enter username and password";
 
-  // Switch views
   forgotPasswordView.classList.add("hidden");
   loginFormView.classList.remove("hidden");
   loginFormView.classList.add("fade-in");
@@ -64,8 +60,19 @@ function backToLogin() {
 
 function handleEmailContinue(event) {
   event.preventDefault();
-  const email = document.getElementById("emailOnly").value;
-  alert("Email continue: " + email);
+
+  const emailInput = document.getElementById("emailOnly");
+  const email = emailInput.value.trim();
+
+  // Check if email is a valid Gmail
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (!gmailRegex.test(email)) {
+    alert("Please enter a valid Gmail address.");
+    return;
+  }
+
+  // If valid Gmail, show create password view
+  showCreatePasswordView(email);
 }
 
 function handleLogin(event) {
@@ -79,5 +86,61 @@ function handleForgotPassword(event) {
   event.preventDefault();
   const email = document.getElementById("forgotEmail").value;
   alert("Password reset link sent to: " + email);
-  // You can add success message or redirect here
+}
+
+function showCreatePasswordView(email) {
+  const initialView = document.getElementById("initialView");
+  const createPasswordView = document.getElementById("createPasswordView");
+  const headerTitle = document.getElementById("headerTitle");
+  const headerSubtitle = document.getElementById("headerSubtitle");
+
+  // Store email for later use
+  if (email) {
+    createPasswordView.setAttribute("data-email", email);
+  }
+
+  // Change header text
+  headerTitle.textContent = "Create Password";
+  headerSubtitle.textContent = "Set up your account password";
+
+  // Switch views
+  initialView.classList.add("hidden");
+  createPasswordView.classList.remove("hidden");
+  createPasswordView.classList.add("fade-in");
+}
+
+function handleCreatePassword(event) {
+  event.preventDefault();
+
+  const password = document.getElementById("createPassword").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const passwordHelp = document.getElementById("passwordHelp");
+  const confirmHelp = document.getElementById("confirmHelp");
+
+  // Reset error messages
+  passwordHelp.classList.remove("text-danger");
+  confirmHelp.style.display = "none";
+
+  // Validate password
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasMinLength = password.length >= 8;
+
+  if (!hasUpperCase || !hasLowerCase || !hasMinLength) {
+    passwordHelp.classList.add("text-danger");
+    return;
+  }
+
+  // Check if passwords match
+  if (password !== confirmPassword) {
+    confirmHelp.style.display = "block";
+    return;
+  }
+
+  // Get the email from the stored data attribute
+  const createPasswordView = document.getElementById("createPasswordView");
+  const email = createPasswordView.getAttribute("data-email");
+
+  // If all validations pass
+  alert("Account created successfully!\nEmail: " + email);
 }

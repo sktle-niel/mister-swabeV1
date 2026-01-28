@@ -1,4 +1,3 @@
-
   <!-- Hero Slider -->
   <div class="hero-slider">
     <div class="slide active">
