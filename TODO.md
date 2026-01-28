@@ -1,10 +1,8 @@
-# TODO: Make Product Modal Dynamic
+# TODO: Fix Load More Products Issue in products.php
 
 ## Steps to Complete
 
-- [x] Edit productModal.php: Remove dummy data and add IDs for dynamic elements (e.g., id="productTitle", id="productPrice", id="mainImage"). Ensure modal starts hidden (display: none). Add JavaScript function to open modal with data.
-- [x] Edit products.php: Change product cards to divs/buttons with onclick="openModal(this)". Add data attributes (data-name, data-price, data-image, data-sizes) to cards.
-- [x] Edit home.php: Change product cards to divs/buttons with onclick="openModal(this)". Add data attributes (data-name, data-price, data-image, data-sizes) to cards.
-- [x] Add JavaScript: Implement openModal function to populate modal from card data, including dynamic size options.
-- [x] Include productModal.php in main.php to load the modal component on the page.
-- [x] Test modal functionality: Click on a product card in products.php or home.php to open the modal with the correct data, including sizes.
+- [x] Analyze the issue: Load more state persists across pages, requiring re-click after navigation.
+- [x] Compare with homeLoadMore.js: It resets state on page change using lastPage in localStorage.
+- [x] Edit productsLoadMore.js: Add page tracking logic to check current page vs stored lastPage, reset currentlyShown to 0 if different, update lastPage, and show initial products.
+- [x] Test the fix: Navigate between pages and verify load more works without extra clicks.

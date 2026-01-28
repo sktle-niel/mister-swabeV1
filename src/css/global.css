@@ -101,7 +101,6 @@ header {
   stroke: #ffd700;
 }
 
-/* Search Bar Animation - FIXED */
 .search-container {
   position: absolute;
   right: 80px; /* Position to the left of the icons */
