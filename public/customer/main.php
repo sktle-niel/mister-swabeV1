@@ -10,6 +10,9 @@ $currentPage = isset($_GET['page']) ? $_GET['page'] : 'home';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../../src/css/global.css">
     <link rel="stylesheet" href="../../src/css/userCart.css">
+    <link rel="stylesheet" href="../../src/css/modal.css">
+    <link rel="stylesheet" href="../../src/css/home.css">
+    <link rel="stylesheet" href="../../src/css/products.css">
 </head>
 <body>
     <?php include 'components/navigationBar.php'; ?>
@@ -34,5 +37,6 @@ $currentPage = isset($_GET['page']) ? $_GET['page'] : 'home';
 
     <script src="../../../src/js/global.js"></script>
     <script src="../../../src/js/bootstrap.bundle.min.js"></script>
+    
 </body>
 </html>
