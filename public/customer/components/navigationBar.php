@@ -1,12 +1,8 @@
 <!-- Top Banner -->
-
 <style>
   .nav-container a{
     color: #fff !important;
   }
-  
-
-  
 </style>
 
 <div class="announcement-bar">
