@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../../src/css/sidebar.css">
     <link rel="stylesheet" href="../../src/css/adminSuccessMessage.css">
     <link rel="stylesheet" href="../../src/css/adminProducts.css">
+    <link rel="stylesheet" href="../../src/css/modal.css">
 </head>
 <body>
     <?php include 'components/topbar.php'; ?>
