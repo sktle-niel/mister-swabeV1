@@ -1,3 +1,24 @@
+// Initialize view on page load
+document.addEventListener("DOMContentLoaded", function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const view = urlParams.get("view");
+
+  if (view === "login") {
+    showLoginForm();
+  } else if (view === "create") {
+    showCreatePasswordView();
+  } else if (view === "forgot") {
+    showForgotPassword();
+  }
+  // If view is 'initial' or null, the default initial view is already shown
+});
+
+function updateURL(view) {
+  const url = new URL(window.location);
+  url.searchParams.set("view", view);
+  window.history.pushState({}, "", url);
+}
+
 function showLoginForm() {
   const initialView = document.getElementById("initialView");
   const loginFormView = document.getElementById("loginFormView");
@@ -30,6 +51,8 @@ function showInitialView() {
   forgotPasswordView.classList.add("hidden");
   initialView.classList.remove("hidden");
   initialView.classList.add("fade-in");
+
+  updateURL("initial");
 }
 
 function showForgotPassword() {
@@ -44,6 +67,8 @@ function showForgotPassword() {
   loginFormView.classList.add("hidden");
   forgotPasswordView.classList.remove("hidden");
   forgotPasswordView.classList.add("fade-in");
+
+  updateURL("forgot");
 }
 
 function backToLogin() {
@@ -58,6 +83,8 @@ function backToLogin() {
   forgotPasswordView.classList.add("hidden");
   loginFormView.classList.remove("hidden");
   loginFormView.classList.add("fade-in");
+
+  updateURL("login");
 }
 
 function showInvalidMessage(message) {
@@ -120,16 +147,6 @@ function showCreatePasswordView(email) {
   createPasswordView.classList.add("fade-in");
 
   updateURL("create");
-}
-
-function showInvalidMessage(message) {
-  const invalidMessage = document.getElementById("invalidMessage");
-  const invalidText = document.querySelector(".invalid-text");
-  invalidText.textContent = message;
-  invalidMessage.style.display = "block";
-  setTimeout(() => {
-    invalidMessage.style.display = "none";
-  }, 3000);
 }
 
 function handleCreatePassword(event) {

@@ -1,27 +1,9 @@
 <?php
-include '../back-end/create/createAccount.php';
 session_start();
+include '../back-end/create/createAccount.php';
+include '../back-end/read/fetchLogin.php';
 
 $current_view = isset($_GET['view']) ? $_GET['view'] : 'initial';
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $result = signIn($email, $password);
-    if ($result['success']) {
-        // Redirect based on user type
-        if ($_SESSION['user_type'] == 'administrator') {
-            header('Location: ../public/administrator/'); // Adjust path
-        } else {
-            header('Location: ../public/customer/main.php');
-        }
-        exit();
-    } else {
-        $_SESSION['login_error'] = $result['message'];
-        header('Location: ?view=login');
-        exit();
-    }
-}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
     $email = $_POST['create_email'];
@@ -42,6 +24,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
             header('Location: ?view=create');
             exit();
         }
+    }
+}
+
+// Handle login form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $result = handleLogin($email, $password);
+    if ($result['success']) {
+        // Redirect based on user type
+        if ($_SESSION['user_type'] == 'administrator') {
+            header('Location: ../public/administrator/');
+        } else {
+            header('Location: ../public/customer/main.php');
+        }
+        exit();
+    } else {
+        $_SESSION['login_error'] = $result['message'];
+        header('Location: ?view=login');
+        exit();
     }
 }
 ?>
@@ -67,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
         </div>
         
         <!-- Initial View -->
-        <div id="initialView">
+        <div id="initialView" <?php echo $current_view != 'initial' ? 'class="hidden"' : ''; ?>>
             <button class="btn-shop" onclick="showLoginForm()">Continue with Shop</button>
             <div class="divider">
                 <span>or</span>
@@ -81,8 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
         </div>
         
         <!-- Login Form (Hidden Initially) -->
-        <div id="loginFormView" class="hidden">
-            <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+        <div id="loginFormView" <?php echo $current_view == 'login' ? 'class=""' : 'class="hidden"'; ?>>
             <form method="post">
                 <div class="input-group">
                     <input type="email" name="email" id="loginEmail" placeholder="Email" required>
@@ -113,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
         </div>
         
         <!-- Create Password View (Hidden Initially) -->
-        <div id="createPasswordView" class="hidden">
+        <div id="createPasswordView" <?php echo $current_view == 'create' ? 'class=""' : 'class="hidden"'; ?>>
             <div class="info-text">
                 Create a strong password for your account.
             </div>
@@ -154,13 +155,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
             document.addEventListener('DOMContentLoaded', function() {
                 const invalidMessage = document.getElementById('invalidMessage');
                 const invalidText = document.querySelector('.invalid-text');
-                invalidText.textContent = '<?php echo $_SESSION['create_error']; ?>';
+                invalidText.textContent = '<?php echo addslashes($_SESSION['create_error']); ?>';
                 invalidMessage.style.display = 'block';
                 setTimeout(() => {
                     invalidMessage.style.display = 'none';
                 }, 3000);
             });
         <?php unset($_SESSION['create_error']); } ?>
+
+        <?php if (isset($_SESSION['login_error'])) { ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                const invalidMessage = document.getElementById('invalidMessage');
+                const invalidText = document.querySelector('.invalid-text');
+                invalidText.textContent = '<?php echo addslashes($_SESSION['login_error']); ?>';
+                invalidMessage.style.display = 'block';
+                setTimeout(() => {
+                    invalidMessage.style.display = 'none';
+                }, 3000);
+            });
+        <?php unset($_SESSION['login_error']); } ?>
     </script>
 </body>
 </html>
