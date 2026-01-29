@@ -4,13 +4,11 @@ error_reporting(0);
 
 include '../../config/connection.php';
 
-function addProduct($data) {
+function editProduct($data) {
     global $conn;
 
-    // Generate random 7-digit ID
-    $id = str_pad(mt_rand(0, 9999999), 7, '0', STR_PAD_LEFT);
-
     // Sanitize inputs
+    $originalSku = mysqli_real_escape_string($conn, $data['originalSku']);
     $name = mysqli_real_escape_string($conn, $data['name']);
     $sku = mysqli_real_escape_string($conn, $data['sku']);
     $category = mysqli_real_escape_string($conn, $data['category']);
@@ -18,28 +16,28 @@ function addProduct($data) {
     $stock = intval($data['stock']);
     $size = mysqli_real_escape_string($conn, $data['size']);
 
-    // Handle image uploads
+    // Handle image uploads if provided
     $images = [];
-    if (isset($_FILES['productImages']) && is_array($_FILES['productImages']['name'])) {
-        $fileCount = count($_FILES['productImages']['name']);
+    if (isset($_FILES['editProductImages']) && is_array($_FILES['editProductImages']['name'])) {
+        $fileCount = count($_FILES['editProductImages']['name']);
         for ($i = 0; $i < $fileCount; $i++) {
-            $error = $_FILES['productImages']['error'][$i];
+            $error = $_FILES['editProductImages']['error'][$i];
             if ($error === UPLOAD_ERR_OK) {
                 // Validate file size (4MB max)
-                $fileSize = $_FILES['productImages']['size'][$i];
+                $fileSize = $_FILES['editProductImages']['size'][$i];
                 if ($fileSize > 4 * 1024 * 1024) {
                     return ['success' => false, 'message' => 'Image file size exceeds 4MB limit'];
                 }
 
                 // Validate file type
-                $type = $_FILES['productImages']['type'][$i];
+                $type = $_FILES['editProductImages']['type'][$i];
                 $allowedTypes = ['image/jpeg', 'image/png'];
                 if (!in_array($type, $allowedTypes)) {
                     return ['success' => false, 'message' => 'Invalid image file type. Only PNG and JPG are allowed.'];
                 }
 
                 // Generate unique filename
-                $name = $_FILES['productImages']['name'][$i];
+                $name = $_FILES['editProductImages']['name'][$i];
                 $extension = pathinfo($name, PATHINFO_EXTENSION);
                 $filename = uniqid() . '.' . $extension;
                 $uploadPath = '../../uploads/' . $filename;
@@ -51,7 +49,7 @@ function addProduct($data) {
                 }
 
                 // Move uploaded file
-                $tmpName = $_FILES['productImages']['tmp_name'][$i];
+                $tmpName = $_FILES['editProductImages']['tmp_name'][$i];
                 if (move_uploaded_file($tmpName, $uploadPath)) {
                     $images[] = 'uploads/' . $filename;
                 } else {
@@ -63,11 +61,6 @@ function addProduct($data) {
         }
     }
 
-    // If no images uploaded, use default
-    if (empty($images)) {
-        // $images[] = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90';
-    }
-
     // Determine status
     if ($stock == 0) {
         $status = 'Out of Stock';
@@ -77,20 +70,39 @@ function addProduct($data) {
         $status = 'In Stock';
     }
 
-    // Check if SKU already exists
-    $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
-    $result = $conn->query($checkSql);
-    if ($result->num_rows > 0) {
-        return ['success' => false, 'message' => 'SKU already exists'];
+    // Check if new SKU already exists (excluding the original SKU)
+    if ($sku !== $originalSku) {
+        $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
+        $result = $conn->query($checkSql);
+        if ($result->num_rows > 0) {
+            return ['success' => false, 'message' => 'SKU already exists'];
+        }
     }
 
-    // Insert query
-    $imagesJson = json_encode($images);
-    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status, created_at)
-            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$size', '$imagesJson', '$status', NOW())";
+    // Build update query
+    $updateFields = [
+        "name = '$name'",
+        "sku = '$sku'",
+        "category = '$category'",
+        "price = $price",
+        "stock = $stock",
+        "size = '$size'",
+        "status = '$status'"
+    ];
+
+    // Only update images if new ones were uploaded
+    if (!empty($images)) {
+        $imagesJson = json_encode($images);
+        $updateFields[] = "images = '$imagesJson'";
+    }
+
+    $updateFieldsStr = implode(', ', $updateFields);
+
+    // Update query
+    $sql = "UPDATE inventory SET $updateFieldsStr WHERE sku = '$originalSku'";
 
     if ($conn->query($sql) === TRUE) {
-        return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'images' => $images];
+        return ['success' => true, 'message' => 'Product updated successfully', 'images' => $images];
     } else {
         error_log('Database error: ' . $conn->error);
         error_log('SQL: ' . $sql);
@@ -101,16 +113,17 @@ function addProduct($data) {
 // If called directly via POST, handle it
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = [
-        'name' => $_POST['productName'] ?? '',
-        'sku' => $_POST['productSKU'] ?? '',
-        'category' => $_POST['productCategory'] ?? '',
-        'price' => $_POST['productPrice'] ?? '',
-        'stock' => $_POST['productStock'] ?? '',
-        'size' => $_POST['productSize'] ?? '',
-        'images' => $_FILES['productImages'] ?? []
+        'originalSku' => $_POST['originalSku'] ?? '',
+        'name' => $_POST['name'] ?? '',
+        'sku' => $_POST['sku'] ?? '',
+        'category' => $_POST['category'] ?? '',
+        'price' => $_POST['price'] ?? '',
+        'stock' => $_POST['stock'] ?? '',
+        'size' => $_POST['size'] ?? '',
+        'image' => $_POST['image'] ?? ''
     ];
 
-    $response = addProduct($data);
+    $response = editProduct($data);
     header('Content-Type: application/json');
     echo json_encode($response);
 }
