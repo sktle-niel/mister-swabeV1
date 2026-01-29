@@ -11,10 +11,13 @@
     <link rel="stylesheet" href="../../src/css/adminSuccessMessage.css">
     <link rel="stylesheet" href="../../src/css/adminProducts.css">
     <link rel="stylesheet" href="../../src/css/modal.css">
+    <link rel="stylesheet" href="../../src/css/successMessage.css">
 </head>
 <body>
     <?php include 'components/topbar.php'; ?>
     <?php include 'components/sidebar.php'; ?>
+    <?php include 'status/successStatus.php'; ?>
+    <?php include 'status/invalidStatus.php'; ?>
 
     <?php
     $currentPage = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
