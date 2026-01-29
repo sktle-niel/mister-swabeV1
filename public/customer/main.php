@@ -16,6 +16,7 @@ $currentPage = isset($_GET['page']) ? $_GET['page'] : 'home';
     <link rel="stylesheet" href="../../src/css/successMessage.css">
 </head>
 <body>
+    <?php include '../administrator/components/topbar.php'; ?>
     <?php include 'components/navigationBar.php'; ?>
 
     <?php
