@@ -9,7 +9,6 @@
         <div class="slide-content">
           <h1>New Sneaker Collection</h1>
           <p>Step up your style game with our latest arrivals</p>
-          <button class="slide-btn">Shop Now</button>
         </div>
       </div>
     </div>
@@ -22,7 +21,6 @@
         <div class="slide-content">
           <h1>Premium T-Shirts</h1>
           <p>Comfort meets style in every piece</p>
-          <button class="slide-btn">Explore</button>
         </div>
       </div>
     </div>
@@ -35,7 +33,6 @@
         <div class="slide-content">
           <h1>Flash Sale - Up to 50% OFF</h1>
           <p>Limited time offer on selected items</p>
-          <button class="slide-btn">Shop Sale</button>
         </div>
       </div>
     </div>
@@ -47,23 +44,63 @@
   </div>
 
   <!-- Category Banners -->
+  <div class="section-header">
+    <h2 class="section-title">Shop by Category</h2>
+    <p class="section-subtitle">Explore our diverse collection of fashion items</p>
+  </div>
   <div class="category-banners">
-    <div class="category-banner">
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=shoes'">
       <img
         src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&h=350&fit=crop&q=90"
-        alt="Sneakers"
+        alt="Shoes"
       />
       <div class="category-banner-overlay">
-        <h3>SNEAKERS</h3>
+        <h3>SHOES</h3>
       </div>
     </div>
-    <div class="category-banner">
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=shirts'">
       <img
         src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&h=350&fit=crop&q=90"
         alt="Shirts"
       />
       <div class="category-banner-overlay">
         <h3>SHIRTS</h3>
+      </div>
+    </div>
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=accessories'">
+      <img
+        src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&h=350&fit=crop&q=90"
+        alt="Accessories"
+      />
+      <div class="category-banner-overlay">
+        <h3>ACCESSORIES</h3>
+      </div>
+    </div>
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=collections'">
+      <img
+        src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700&h=350&fit=crop&q=90"
+        alt="Collections"
+      />
+      <div class="category-banner-overlay">
+        <h3>COLLECTIONS</h3>
+      </div>
+    </div>
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=sale'">
+      <img
+        src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=700&h=350&fit=crop&q=90"
+        alt="Sale"
+      />
+      <div class="category-banner-overlay">
+        <h3>SALE</h3>
+      </div>
+    </div>
+    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=new-arrivals'">
+      <img
+        src="https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=700&h=350&fit=crop&q=90"
+        alt="New Arrivals"
+      />
+      <div class="category-banner-overlay">
+        <h3>NEW ARRIVALS</h3>
       </div>
     </div>
   </div>

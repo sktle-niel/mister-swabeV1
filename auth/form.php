@@ -1,3 +1,50 @@
+<?php
+include '../back-end/create/createAccount.php';
+session_start();
+
+$current_view = isset($_GET['view']) ? $_GET['view'] : 'initial';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $result = signIn($email, $password);
+    if ($result['success']) {
+        // Redirect based on user type
+        if ($_SESSION['user_type'] == 'administrator') {
+            header('Location: ../public/administrator/'); // Adjust path
+        } else {
+            header('Location: ../public/customer/main.php');
+        }
+        exit();
+    } else {
+        $_SESSION['login_error'] = $result['message'];
+        header('Location: ?view=login');
+        exit();
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
+    $email = $_POST['create_email'];
+    $password = $_POST['create_password'];
+    $confirm_password = $_POST['confirm_password'];
+    if ($password !== $confirm_password) {
+        $_SESSION['create_error'] = 'Passwords do not match';
+        header('Location: ?view=create');
+        exit();
+    } else {
+        $result = createAccount($email, $password);
+        if ($result['success']) {
+            $_SESSION['create_success'] = $result['message'];
+            header('Location: ?view=initial');
+            exit();
+        } else {
+            $_SESSION['create_error'] = $result['message'];
+            header('Location: ?view=create');
+            exit();
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,14 +54,16 @@
     <link rel="stylesheet" href="../src/css/forAuth.css">
 </head>
 <body>
+    <?php include 'status/success.php'; ?>
+    <?php include 'status/invalid.php'; ?>
     <div class="login-container">
         <div class="logo">
             <h1>Mr. Swabe Apparel</h1>
             <p>& COLLECTIONS</p>
         </div>
         <div class="login-header">
-            <h2 id="headerTitle">Sign in</h2>
-            <p id="headerSubtitle">Sign in or <a href="#">create an account</a></p>
+            <h2 id="headerTitle"><?php echo $current_view == 'login' ? 'Login' : ($current_view == 'create' ? 'Create Password' : 'Sign in'); ?></h2>
+            <p id="headerSubtitle"><?php echo $current_view == 'login' ? 'Enter username and password' : ($current_view == 'create' ? 'Set up your account password' : 'Sign in or <a href="#">create an account</a>'); ?></p>
         </div>
         
         <!-- Initial View -->
@@ -23,27 +72,28 @@
             <div class="divider">
                 <span>or</span>
             </div>
-            <form onsubmit="handleEmailContinue(event)">
+            <form>
                 <div class="input-group">
                     <input type="email" id="emailOnly" placeholder="Email" required>
                 </div>
-                <button type="submit" class="btn-continue">Continue</button>
+                <button type="button" onclick="handleEmailContinue()" class="btn-continue">Continue</button>
             </form>
         </div>
         
         <!-- Login Form (Hidden Initially) -->
         <div id="loginFormView" class="hidden">
-            <form onsubmit="handleLogin(event)">
+            <?php if (isset($error)) echo "<p style='color:red;'>$error</p>"; ?>
+            <form method="post">
                 <div class="input-group">
-                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <input type="email" name="email" id="loginEmail" placeholder="Email" required>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <input type="password" name="password" id="loginPassword" placeholder="Password" required>
                 </div>
                 <div class="forgot-password">
                     <a onclick="showForgotPassword()">Forgot password?</a>
                 </div>
-                <button type="submit" class="btn-continue">Sign In</button>
+                <button type="submit" name="login" class="btn-continue">Sign In</button>
                 <button type="button" class="btn-back" onclick="showInitialView()">Back</button>
             </form>
         </div>
@@ -67,16 +117,17 @@
             <div class="info-text">
                 Create a strong password for your account.
             </div>
-            <form onsubmit="handleCreatePassword(event)">
+            <form method="post">
+                <input type="hidden" id="createEmailHidden" name="create_email">
                 <div class="input-group">
-                    <input type="password" id="createPassword" placeholder="Password" required>
+                    <input type="password" id="createPassword" name="create_password" placeholder="Password" required>
                     <small id="passwordHelp" class="form-text">Password must be at least 8 characters with uppercase and lowercase letters.</small>
                 </div>
                 <div class="input-group">
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm Password" required>
                     <small id="confirmHelp" class="form-text text-danger" style="display: none;">Passwords do not match.</small>
                 </div>
-                <button type="submit" class="btn-continue">Create Account</button>
+                <button type="submit" name="create_account" class="btn-continue">Create Account</button>
                 <button type="button" class="btn-back" onclick="showInitialView()">Back</button>
             </form>
         </div>
@@ -88,5 +139,28 @@
     </div>
 
     <script src="../src/js/form.js"></script>
+    <script>
+        <?php if (isset($_SESSION['create_success'])) { ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            });
+        <?php unset($_SESSION['create_success']); } ?>
+
+        <?php if (isset($_SESSION['create_error'])) { ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                const invalidMessage = document.getElementById('invalidMessage');
+                const invalidText = document.querySelector('.invalid-text');
+                invalidText.textContent = '<?php echo $_SESSION['create_error']; ?>';
+                invalidMessage.style.display = 'block';
+                setTimeout(() => {
+                    invalidMessage.style.display = 'none';
+                }, 3000);
+            });
+        <?php unset($_SESSION['create_error']); } ?>
+    </script>
 </body>
 </html>

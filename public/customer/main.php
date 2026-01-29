@@ -13,6 +13,7 @@ $currentPage = isset($_GET['page']) ? $_GET['page'] : 'home';
     <link rel="stylesheet" href="../../src/css/modal.css">
     <link rel="stylesheet" href="../../src/css/home.css">
     <link rel="stylesheet" href="../../src/css/products.css">
+    <link rel="stylesheet" href="../../src/css/successMessage.css">
 </head>
 <body>
     <?php include 'components/navigationBar.php'; ?>
