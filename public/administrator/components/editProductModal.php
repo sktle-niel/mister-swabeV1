@@ -103,17 +103,22 @@ $closeFunction = $closeFunction ?? 'closeEditProductModal';
                         <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Separate multiple sizes with commas</p>
                     </div>
 
-                    <!-- Image URL -->
+                    <!-- Product Images -->
                     <div style="grid-column: span 2;">
-                        <label for="editProductImage" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
-                            Product Image URL
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
+                            Product Images
                         </label>
-                        <input type="url" id="editProductImage" name="editProductImage"
-                            placeholder="https://example.com/image.jpg"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
-                            onblur="this.style.borderColor='#e5e7eb';">
-                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Leave empty to use default product image</p>
+                        <div id="editImageUploadContainer" style="border: 2px dashed #ddd; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa;"
+                             onclick="document.getElementById('editProductImages').click();"
+                             ondragover="handleEditDragOver(event)"
+                             ondragleave="handleEditDragLeave(event)"
+                             ondrop="handleEditDrop(event)">
+                            <div style="font-size: 48px; color: #ccc; margin-bottom: 10px;">+</div>
+                            <div style="color: #666; font-size: 16px;">Click to add images or drag & drop</div>
+                            <div style="color: #999; font-size: 12px; margin-top: 5px;">PNG, JPG only (max 4MB each)</div>
+                        </div>
+                        <input type="file" id="editProductImages" name="editProductImages[]" multiple accept="image/png,image/jpeg" style="display: none;" onchange="handleEditImageSelection(event)">
+                        <div id="editImagePreview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
                     </div>
                 </div>
 
@@ -166,8 +171,95 @@ function openEditProductModal(sku) {
         document.getElementById("editProductPrice").value = product.price;
         document.getElementById("editProductStock").value = product.stock;
         document.getElementById("editProductSize").value = product.size || "";
-        document.getElementById("editProductImage").value = product.image || "";
+        // Clear image previews
+        document.getElementById("editImagePreview").innerHTML = "";
         document.getElementById("<?php echo $modalId; ?>Overlay").style.display = 'flex';
+    }
+}
+
+function handleEditDragOver(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const container = document.getElementById('editImageUploadContainer');
+    container.style.borderColor = '#3b82f6';
+    container.style.backgroundColor = '#eff6ff';
+}
+
+function handleEditDragLeave(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const container = document.getElementById('editImageUploadContainer');
+    container.style.borderColor = '#ddd';
+    container.style.backgroundColor = '#fafafa';
+}
+
+function handleEditDrop(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const container = document.getElementById('editImageUploadContainer');
+    container.style.borderColor = '#ddd';
+    container.style.backgroundColor = '#fafafa';
+
+    const files = event.dataTransfer.files;
+    const fileInput = document.getElementById('editProductImages');
+    fileInput.files = files;
+    handleEditImageSelection({ target: { files: files } });
+}
+
+function handleEditImageSelection(event) {
+    const files = event.target.files;
+    const previewContainer = document.getElementById('editImagePreview');
+    previewContainer.innerHTML = '';
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type !== 'image/png' && file.type !== 'image/jpeg') {
+            alert('Only PNG and JPG files are allowed.');
+            event.target.value = '';
+            return;
+        }
+        if (file.size > 4 * 1024 * 1024) {
+            alert('File size exceeds 4MB limit.');
+            event.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgContainer = document.createElement('div');
+            imgContainer.style.position = 'relative';
+            imgContainer.style.display = 'inline-block';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.width = '80px';
+            img.style.height = '80px';
+            img.style.objectFit = 'cover';
+            img.style.borderRadius = '4px';
+            img.style.border = '1px solid #ddd';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '×';
+            removeBtn.style.position = 'absolute';
+            removeBtn.style.top = '-5px';
+            removeBtn.style.right = '-5px';
+            removeBtn.style.background = 'red';
+            removeBtn.style.color = 'white';
+            removeBtn.style.border = 'none';
+            removeBtn.style.borderRadius = '50%';
+            removeBtn.style.width = '20px';
+            removeBtn.style.height = '20px';
+            removeBtn.style.cursor = 'pointer';
+            removeBtn.style.fontSize = '12px';
+            removeBtn.onclick = function() {
+                imgContainer.remove();
+            };
+
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(removeBtn);
+            previewContainer.appendChild(imgContainer);
+        };
+        reader.readAsDataURL(file);
     }
 }
 
@@ -182,10 +274,9 @@ function <?php echo $confirmFunction; ?>() {
     const name = document.getElementById("editProductName").value.trim();
     const sku = document.getElementById("editProductSKU").value.trim();
     const category = document.getElementById("editProductCategory").value;
-    const price = document.getElementById("editProductPrice").value.trim();
+    const price = document.getElementById("editProductPrice").value.trim().replace('₱', '');
     const stock = parseInt(document.getElementById("editProductStock").value);
     const size = document.getElementById("editProductSize").value.trim();
-    const image = document.getElementById("editProductImage").value.trim() || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90";
 
     // Check if new SKU already exists (excluding the current product)
     if (sku !== originalSku && products.some(p => p.sku === sku)) {
@@ -193,58 +284,72 @@ function <?php echo $confirmFunction; ?>() {
         return;
     }
 
-    // Initialize temporary changes if not exists
-    if (!window.temporaryChanges) {
-        window.temporaryChanges = [];
+    // Prepare data for AJAX request
+    const formData = new FormData();
+    formData.append('originalSku', originalSku);
+    formData.append('name', name);
+    formData.append('sku', sku);
+    formData.append('category', category);
+    formData.append('price', price);
+    formData.append('stock', stock);
+    formData.append('size', size);
+
+    // Append image files
+    const imageInput = document.getElementById('editProductImages');
+    for (let i = 0; i < imageInput.files.length; i++) {
+        formData.append('editProductImages[]', imageInput.files[i]);
     }
 
-    // Determine status based on stock
-    let status = "In Stock";
-    if (stock === 0) status = "Out of Stock";
-    else if (stock <= 10) status = "Low Stock";
+    // Send AJAX request to editProduct.php
+    fetch('../../back-end/update/editProduct.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the local products array
+            const productIndex = products.findIndex(p => p.sku === originalSku);
+            if (productIndex !== -1) {
+                // Determine status based on stock
+                let status = "In Stock";
+                if (stock === 0) status = "Out of Stock";
+                else if (stock <= 10) status = "Low Stock";
 
-    const updatedProduct = {
-        originalSku,
-        name,
-        sku,
-        category,
-        price,
-        stock,
-        status,
-        image,
-        size: size || "N/A"
-    };
+                const updatedProduct = {
+                    id: products[productIndex].id,
+                    name,
+                    sku,
+                    category,
+                    price,
+                    stock,
+                    status,
+                    image: data.images && data.images.length > 0 ? data.images[0] : products[productIndex].image,
+                    size: size || "N/A"
+                };
+                products[productIndex] = updatedProduct;
+                localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                renderProducts(products);
+            }
 
-    // Check if this product already has temporary changes
-    const existingChangeIndex = window.temporaryChanges.findIndex(change => change.originalSku === originalSku);
-    if (existingChangeIndex !== -1) {
-        window.temporaryChanges[existingChangeIndex] = updatedProduct;
-    } else {
-        window.temporaryChanges.push(updatedProduct);
-    }
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            const successText = successMessage.querySelector('.success-text');
+            successText.textContent = 'Product Updated Successfully!';
+            successMessage.style.display = 'block';
 
-    // Save temporary changes to localStorage
-    localStorage.setItem('temporaryChanges', JSON.stringify(window.temporaryChanges));
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 3000);
 
-    // Update the UI to show temporary changes (visual indicator)
-    const productIndex = products.findIndex(p => p.sku === originalSku);
-    if (productIndex !== -1) {
-        // Temporarily update the display
-        products[productIndex] = { ...products[productIndex], ...updatedProduct };
-        delete products[productIndex].originalSku;
-        renderProducts(products);
-    }
-
-    // Show temporary save message
-    const successMessage = document.getElementById('successMessage');
-    const successText = successMessage.querySelector('.success-text');
-    successText.textContent = 'Successfully Updated!';
-    successMessage.style.display = 'block';
-
-    setTimeout(() => {
-        successMessage.style.display = 'none';
-    }, 3000);
-
-    <?php echo $closeFunction; ?>();
+            <?php echo $closeFunction; ?>();
+        } else {
+            alert(data.message || 'Error updating product');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating product');
+    });
 }
 </script>

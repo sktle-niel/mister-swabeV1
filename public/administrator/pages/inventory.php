@@ -11,9 +11,12 @@ include 'components/editProductModal.php';
 include 'components/deleteProductModal.php';
 include '../../back-end/create/addProduct.php';
 include '../../back-end/read/fetchProduct.php';
+include '../../back-end/update/editProduct.php';
+include '../../back-end/delete/removeProduct.php';
 
 // Fetch products from database
 $products = fetchProducts();
+$recentProduct = !empty($products) ? $products[0] : null;
 ?>
 
 
@@ -470,22 +473,43 @@ function previewImage(imageUrl) {
 
 function confirmDelete() {
     if (window.productToDelete) {
-        const index = products.findIndex(p => p.sku === window.productToDelete);
-        if (index !== -1) {
-            products.splice(index, 1);
-            localStorage.setItem('inventoryProducts', JSON.stringify(products));
-            renderProducts(products);
-            
-            // Show success message with custom text
-            const successMessage = document.getElementById('successMessage');
-            const successText = successMessage.querySelector('.success-text');
-            successText.textContent = 'Successfully Deleted!';
-            successMessage.style.display = 'block';
-            
-            setTimeout(() => {
-                successMessage.style.display = 'none';
-            }, 3000);
-        }
+        // Send AJAX request to delete product from database
+        fetch('../../back-end/delete/removeProduct.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'sku=' + encodeURIComponent(window.productToDelete)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove from local products array
+                const index = products.findIndex(p => p.sku === window.productToDelete);
+                if (index !== -1) {
+                    products.splice(index, 1);
+                    localStorage.setItem('inventoryProducts', JSON.stringify(products));
+                    filterProducts(); // Re-apply current filters to update the UI
+                }
+
+                // Show success message
+                const successMessage = document.getElementById('successMessage');
+                const successText = successMessage.querySelector('.success-text');
+                successText.textContent = 'Successfully Deleted!';
+                successMessage.style.display = 'block';
+
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 3000);
+            } else {
+                alert(data.message || 'Error deleting product');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting product');
+        });
+
         window.productToDelete = null;
         document.getElementById('deleteModalOverlay').style.display = 'none';
     }
@@ -603,7 +627,8 @@ function openEditProductModal(sku) {
         document.getElementById("editProductPrice").value = product.price;
         document.getElementById("editProductStock").value = product.stock;
         document.getElementById("editProductSize").value = product.size || "";
-        document.getElementById("editProductImage").value = product.image || "";
+        // Clear image previews
+        document.getElementById("editImagePreview").innerHTML = "";
         document.getElementById("editProductModalOverlay").style.display = 'flex';
     }
 }
@@ -703,47 +728,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Recent Activity -->
             <div class="card">
                 <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: var(--spacing-md);">Recent Activity</h3>
-                <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
-                    <div style="padding: var(--spacing-sm); background: rgba(245, 158, 11, 0.1); border-left: 3px solid var(--accent-warning); border-radius: var(--radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                            <span class="badge badge-warning" style="font-size: 0.625rem;">Low Stock Alert</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">5 minutes ago</span>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500;">Premium Cotton Tee</div>
-                    </div>
-                    
-                    <div style="padding: var(--spacing-sm); background: rgba(16, 185, 129, 0.1); border-left: 3px solid var(--accent-success); border-radius: var(--radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                            <span class="badge badge-success" style="font-size: 0.625rem;">Product Added</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">1 hour ago</span>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500;">Urban Comfort Sneakers</div>
-                    </div>
-                    
-                    <div style="padding: var(--spacing-sm); background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6; border-radius: var(--radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                            <span class="badge" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; font-size: 0.625rem;">Stock Updated</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">2 hours ago</span>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500;">Classic Running Shoes</div>
-                    </div>
-                    
-                    <div style="padding: var(--spacing-sm); background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--accent-danger); border-radius: var(--radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                            <span class="badge badge-danger" style="font-size: 0.625rem;">Out of Stock</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">3 hours ago</span>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500;">Casual Button Down</div>
-                    </div>
-                    
-                    <div style="padding: var(--spacing-sm); background: rgba(139, 92, 246, 0.1); border-left: 3px solid #8b5cf6; border-radius: var(--radius-sm);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-                            <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6; font-size: 0.625rem;">Price Changed</span>
-                            <span style="font-size: 0.75rem; color: var(--text-muted);">5 hours ago</span>
-                        </div>
-                        <div style="font-size: 0.875rem; font-weight: 500;">Street Style Kicks</div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

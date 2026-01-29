@@ -64,8 +64,11 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
                         </div>
                     </div>
                     <div style="grid-column: span 2;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Product Images</label>
-                        <div id="imageUploadContainer" style="border: 2px dashed #ddd; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa;"
+                        <label for="productImages" style="display: block; margin-bottom: 5px; font-weight: 500;">Product Images</label>
+                        <input type="file" id="productImages" name="productImages[]" multiple accept="image/*"
+                            style="display: none;" onchange="handleImageSelection(event)">
+                        <div id="imageUploadContainer" 
+                             style="border: 2px dashed #ddd; border-radius: 8px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa;"
                              onclick="document.getElementById('productImages').click();"
                              ondragover="handleDragOver(event)"
                              ondragleave="handleDragLeave(event)"
@@ -74,7 +77,6 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
                             <div style="color: #666; font-size: 16px;">Click to add images or drag & drop</div>
                             <div style="color: #999; font-size: 12px; margin-top: 5px;">PNG, JPG only (max 4MB each)</div>
                         </div>
-                        <input type="file" id="productImages" name="productImages[]" multiple accept="image/png,image/jpeg" style="display: none;" onchange="handleImageSelection(event)">
                         <div id="imagePreview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
                     </div>
                 </div>
