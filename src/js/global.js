@@ -53,8 +53,10 @@ function showSlide(index) {
 }
 
 function nextSlide() {
-  currentSlide = (currentSlide + 1) % slides.length;
-  showSlide(currentSlide);
+  if (slides.length > 0) {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showSlide(currentSlide);
+  }
 }
 
 // Auto advance slides

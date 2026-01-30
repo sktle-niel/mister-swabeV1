@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     saveState();
 
-    if (currentlyShown >= totalProducts) {
+    if (loadMoreBtn && currentlyShown >= totalProducts) {
       loadMoreBtn.style.display = "none";
     }
 
@@ -54,9 +54,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Function to update button text
   function updateButtonText() {
-    const remaining = totalProducts - currentlyShown;
-    if (remaining > 0) {
-      loadMoreBtn.textContent = `Load More Products (${remaining} remaining)`;
+    if (loadMoreBtn) {
+      const remaining = totalProducts - currentlyShown;
+      if (remaining > 0) {
+        loadMoreBtn.textContent = `Load More Products (${remaining} remaining)`;
+      }
     }
   }
 
@@ -78,28 +80,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
   updateButtonText();
 
-  if (currentlyShown >= totalProducts) {
+  if (loadMoreBtn && currentlyShown >= totalProducts) {
     loadMoreBtn.style.display = "none";
   }
 
-  loadMoreBtn.addEventListener("click", function () {
-    showProducts(productsPerPage);
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", function () {
+      showProducts(productsPerPage);
 
-    const firstNewProduct =
-      productCards[
-        currentlyShown -
-          Math.min(
-            productsPerPage,
-            totalProducts - (currentlyShown - productsPerPage),
-          )
-      ];
-    if (firstNewProduct) {
-      setTimeout(() => {
-        firstNewProduct.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }, 100);
-    }
-  });
+      const firstNewProduct =
+        productCards[
+          currentlyShown -
+            Math.min(
+              productsPerPage,
+              totalProducts - (currentlyShown - productsPerPage),
+            )
+        ];
+      if (firstNewProduct) {
+        setTimeout(() => {
+          firstNewProduct.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }, 100);
+      }
+    });
+  }
 });

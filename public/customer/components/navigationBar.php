@@ -1,3 +1,16 @@
+<?php
+include '../../config/connection.php';
+
+$query = "SELECT id, name FROM categories WHERE 1";
+$result = $conn->query($query);
+$categories = [];
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $categories[] = $row;
+    }
+}
+?>
+
 <!-- Top Banner -->
 <style>
   .nav-container a{
@@ -94,11 +107,8 @@
 <!-- Navigation -->
 <nav>
   <div class="nav-container">
-    <a href="/public/customer/main.php?page=products&category=new-arrivals" class="nav-link">New Arrivals</a>
-    <a href="/public/customer/main.php?page=products&category=shoes" class="nav-link">Shoes</a>
-    <a href="/public/customer/main.php?page=products&category=shirts" class="nav-link">Shirts</a>
-    <a href="/public/customer/main.php?page=products&category=collections" class="nav-link">Collections</a>
-    <a href="/public/customer/main.php?page=products&category=accessories" class="nav-link">Accessories</a>
-    <a href="/public/customer/main.php?page=products&category=sale" class="nav-link">Sale</a>
+    <?php foreach ($categories as $category): ?>
+      <a href="/public/customer/main.php?page=products&category=<?php echo urlencode($category['name']); ?>" class="nav-link"><?php echo htmlspecialchars($category['name']); ?></a>
+    <?php endforeach; ?>
   </div>
 </nav>
