@@ -1,6 +1,12 @@
 <?php
-ini_set('display_errors', 0);
-error_reporting(0);
+// Start output buffering to prevent header issues
+ob_start();
+
+// Enable error logging for debugging
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('log_errors', 1);
+ini_set('error_log', '../../logs/php_errors.log');
 
 include '../../config/connection.php';
 
@@ -13,10 +19,19 @@ function addProduct($data) {
     // Sanitize inputs
     $name = mysqli_real_escape_string($conn, $data['name']);
     $sku = mysqli_real_escape_string($conn, $data['sku']);
+    
+    // Handle category - store the name directly
     $category = mysqli_real_escape_string($conn, $data['category']);
+    
     $price = floatval($data['price']);
     $stock = intval($data['stock']);
-    $size = mysqli_real_escape_string($conn, $data['size']);
+    
+    // Handle size - can be string or array
+    if (is_array($data['size'])) {
+        $size = mysqli_real_escape_string($conn, implode(', ', $data['size']));
+    } else {
+        $size = mysqli_real_escape_string($conn, $data['size']);
+    }
 
     // Handle image uploads
     $images = [];
@@ -33,7 +48,7 @@ function addProduct($data) {
 
                 // Validate file type
                 $type = $_FILES['productImages']['type'][$i];
-                $allowedTypes = ['image/jpeg', 'image/png'];
+                $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
                 if (!in_array($type, $allowedTypes)) {
                     return ['success' => false, 'message' => 'Invalid image file type. Only PNG and JPG are allowed.'];
                 }
@@ -47,7 +62,9 @@ function addProduct($data) {
                 // Ensure uploads directory exists and is writable
                 $uploadDir = dirname($uploadPath);
                 if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                    if (!mkdir($uploadDir, 0755, true)) {
+                        return ['success' => false, 'message' => 'Failed to create upload directory'];
+                    }
                 }
 
                 // Move uploaded file
@@ -63,9 +80,9 @@ function addProduct($data) {
         }
     }
 
-    // If no images uploaded, use default
+    // If no images uploaded, use default or empty array
     if (empty($images)) {
-        // $images[] = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90';
+        $images[] = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90';
     }
 
     // Determine status
@@ -80,38 +97,62 @@ function addProduct($data) {
     // Check if SKU already exists
     $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
     $result = $conn->query($checkSql);
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         return ['success' => false, 'message' => 'SKU already exists'];
     }
 
-    // Insert query
+    // Insert query - REMOVED created_at column
     $imagesJson = json_encode($images);
-    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status, created_at)
-            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$size', '$imagesJson', '$status', NOW())";
+    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status)
+            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$size', '$imagesJson', '$status')";
 
     if ($conn->query($sql) === TRUE) {
         return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'images' => $images];
     } else {
         error_log('Database error: ' . $conn->error);
         error_log('SQL: ' . $sql);
-        return ['success' => false, 'message' => 'Database error: ' . $conn->error, 'debug' => ['sql' => $sql, 'error' => $conn->error]];
+        return ['success' => false, 'message' => 'Database error: ' . $conn->error];
     }
 }
 
-// If called directly via POST, handle it
+// Handle POST request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $data = [
-        'name' => $_POST['productName'] ?? '',
-        'sku' => $_POST['productSKU'] ?? '',
-        'category' => $_POST['productCategory'] ?? '',
-        'price' => $_POST['productPrice'] ?? '',
-        'stock' => $_POST['productStock'] ?? '',
-        'size' => $_POST['productSize'] ?? '',
-        'images' => $_FILES['productImages'] ?? []
-    ];
-
-    $response = addProduct($data);
+    // Clear any previous output
+    ob_clean();
+    
+    // Set JSON header
     header('Content-Type: application/json');
-    echo json_encode($response);
+    
+    try {
+        // Handle size data
+        $size = '';
+        if (isset($_POST['productSize']) && is_array($_POST['productSize'])) {
+            $size = $_POST['productSize'];
+        } elseif (isset($_POST['productSize'])) {
+            $size = $_POST['productSize'];
+        }
+        
+        $data = [
+            'name' => $_POST['productName'] ?? '',
+            'sku' => $_POST['productSKU'] ?? '',
+            'category' => $_POST['productCategory'] ?? '',
+            'price' => $_POST['productPrice'] ?? '',
+            'stock' => $_POST['productStock'] ?? '',
+            'size' => $size
+        ];
+
+        $response = addProduct($data);
+        echo json_encode($response);
+    } catch (Exception $e) {
+        error_log('Exception in addProduct: ' . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
+    }
+    
+    // End output buffering and send
+    ob_end_flush();
+    exit;
 }
+
+// If not POST, clear buffer and exit
+ob_end_clean();
 ?>
