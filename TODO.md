@@ -1,10 +1,6 @@
-# Task: Copy UI Layout from editProductModal.php to addProductModal.php
+# TODO for Updating customers.php
 
-## Steps:
-
-- [ ] Replace modal HTML structure with editProductModal layout
-- [ ] Change IDs and names from edit* to add* or product\*
-- [ ] Change sizes input from button selection to text input
-- [ ] Update JavaScript functions: rename drag/drop to handleAdd\*, adapt size handling
-- [ ] Update confirm function for text size input
-- [ ] Test the modal functionality
+- [x] Add PHP code at the top to include database connection and fetch users where user_type = 'customer'
+- [x] Update table headers to: Email, User Type, Status, Actions
+- [x] Replace hardcoded <tbody> with PHP loop to display fetched data (email, 'customer', 'Active', View Profile button)
+- [ ] Test the page to ensure data is displayed correctly
