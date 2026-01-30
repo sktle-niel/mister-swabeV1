@@ -43,10 +43,6 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
                         <label for="productCategory" style="display: block; margin-bottom: 5px; font-weight: 500;">Category *</label>
                         <select id="productCategory" name="productCategory" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;" onchange="updateSizeOptions()">
                             <option value="">Select Category</option>
-                            <option value="Sneakers">Sneakers</option>
-                            <option value="T-Shirts">T-Shirts</option>
-                            <option value="Shirts">Shirts</option>
-                            <option value="Accessories">Accessories</option>
                         </select>
                     </div>
                     <div>
@@ -91,6 +87,31 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
 </div>
 
 <script>
+// Fetch and populate categories
+function loadCategories() {
+    fetch('../../back-end/read/fetchCategory.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const categorySelects = document.querySelectorAll('#productCategory, #editProductCategory');
+                categorySelects.forEach(select => {
+                    // Clear existing options except the first one
+                    select.innerHTML = '<option value="">Select Category</option>';
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.name;
+                        option.textContent = category.name;
+                        select.appendChild(option);
+                    });
+                });
+            }
+        })
+        .catch(error => console.error('Error loading categories:', error));
+}
+
+// Load categories when page loads
+document.addEventListener('DOMContentLoaded', loadCategories);
+
 // Add Product Modal Functions
 function closeAddProductModal() {
     document.getElementById("addProductModalOverlay").style.display = "none";

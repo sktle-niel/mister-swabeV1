@@ -11,7 +11,25 @@ function editProduct($data) {
     $originalSku = mysqli_real_escape_string($conn, $data['originalSku']);
     $name = mysqli_real_escape_string($conn, $data['name']);
     $sku = mysqli_real_escape_string($conn, $data['sku']);
-    $category = mysqli_real_escape_string($conn, $data['category']);
+
+    // Handle category - can be either ID or name
+    $category = $data['category'];
+    if (is_numeric($category)) {
+        // It's a category ID
+        $category = intval($category);
+    } else {
+        // It's a category name - look up the ID
+        $categoryName = mysqli_real_escape_string($conn, $category);
+        $categorySql = "SELECT id FROM categories WHERE name = '$categoryName' LIMIT 1";
+        $categoryResult = $conn->query($categorySql);
+        if ($categoryResult && $categoryResult->num_rows > 0) {
+            $categoryRow = $categoryResult->fetch_assoc();
+            $category = intval($categoryRow['id']);
+        } else {
+            return ['success' => false, 'message' => 'Invalid category'];
+        }
+    }
+
     $price = floatval($data['price']);
     $stock = intval($data['stock']);
     $size = mysqli_real_escape_string($conn, $data['size']);

@@ -1,10 +1,10 @@
 <?php
-include '../config/connection.php';
+include '../../config/connection.php';
 
 function fetchProducts() {
     global $conn;
 
-    $sql = "SELECT id, name, sku, category, price, stock, size, images, status FROM inventory ORDER BY id DESC";
+    $sql = "SELECT i.id, i.name, i.sku, CASE WHEN i.category REGEXP '^[0-9]+$' THEN c.name ELSE i.category END as category_name, i.price, i.stock, i.size, i.images, i.status FROM inventory i LEFT JOIN categories c ON i.category = c.id ORDER BY i.id DESC";
     $result = $conn->query($sql);
 
     $products = [];
@@ -24,7 +24,7 @@ function fetchProducts() {
                 'id' => $row['id'],
                 'name' => $row['name'],
                 'sku' => $row['sku'],
-                'category' => $row['category'],
+                'category' => $row['category_name'],
                 'price' => '₱' . number_format($row['price'], 2),
                 'stock' => (int)$row['stock'],
                 'size' => $row['size'] ?: 'N/A',
