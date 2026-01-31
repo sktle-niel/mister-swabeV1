@@ -38,8 +38,8 @@
         case 'customers':
             include 'pages/customers.php';
             break;
-        case 'analytics':
-            include 'pages/analytics.php';
+        case 'printSku':
+            include 'pages/printSku.php';
             break;
         case 'reports':
             include 'pages/reports.php';
