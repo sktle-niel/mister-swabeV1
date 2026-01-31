@@ -3,6 +3,6 @@
 ## Tasks
 
 - [x] Remove the include for 'skuModal.php' from 'inventory.php'
-- [ ] Delete the entire 'skuModal.php' file
-- [ ] Remove the "Generate" button from the product actions in 'inventory.js'
-- [ ] Remove the 'generateProduct' function from 'inventory.js'
+- [x] Delete the entire 'skuModal.php' file
+- [x] Remove the "Generate" button from the product actions in 'inventory.js'
+- [x] Remove the 'generateProduct' function from 'inventory.js'
