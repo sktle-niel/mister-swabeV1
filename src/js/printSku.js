@@ -259,6 +259,7 @@ function printProductBarcode(sku) {
     // Add to selected with default quantity of 1
     selectedBarcodes.push({ sku: sku, quantity: 1 });
   }
+  saveSelectedBarcodesToStorage();
   updatePrintBarcodeContainer();
 }
 
@@ -371,25 +372,72 @@ function updatePrintBarcodeContainer() {
     container.appendChild(barcodeDiv);
   });
 
-  // Add print all button
+  // Add buttons container
+  const buttonsContainer = document.createElement("div");
+  buttonsContainer.style.display = "flex";
+  buttonsContainer.style.flexDirection = "column";
+  buttonsContainer.style.gap = "8px";
+  buttonsContainer.style.marginTop = "10px";
+
+  // Remove all button
+  const removeAllBtn = document.createElement("button");
+  removeAllBtn.className = "btn";
+  removeAllBtn.style.width = "100%";
+  removeAllBtn.style.backgroundColor = "#dc2626";
+  removeAllBtn.style.color = "white";
+  removeAllBtn.style.border = "1px solid #dc2626";
+  removeAllBtn.style.textAlign = "center";
+  removeAllBtn.style.padding = "12px";
+  removeAllBtn.style.display = "block";
+  removeAllBtn.textContent = "Remove All";
+  removeAllBtn.onclick = removeAllBarcodes;
+  buttonsContainer.appendChild(removeAllBtn);
+
+  // Print all button
   const printAllBtn = document.createElement("button");
-  printAllBtn.className = "btn btn-primary";
+  printAllBtn.className = "btn";
   printAllBtn.style.width = "100%";
-  printAllBtn.style.marginTop = "10px";
+  printAllBtn.style.backgroundColor = "black";
+  printAllBtn.style.color = "white";
+  printAllBtn.style.border = "1px solid black";
+  printAllBtn.style.textAlign = "center";
+  printAllBtn.style.padding = "12px";
+  printAllBtn.style.display = "block";
   printAllBtn.textContent = "Print All Selected Barcodes";
   printAllBtn.onclick = printAllSelectedBarcodes;
-  container.appendChild(printAllBtn);
+  buttonsContainer.appendChild(printAllBtn);
+
+  container.appendChild(buttonsContainer);
 }
 
 function updateQuantity(index, newQuantity) {
   if (newQuantity < 1) newQuantity = 1;
   selectedBarcodes[index].quantity = newQuantity;
+  saveSelectedBarcodesToStorage();
   updatePrintBarcodeContainer();
 }
 
 function removeBarcode(index) {
   selectedBarcodes.splice(index, 1);
+  saveSelectedBarcodesToStorage();
   updatePrintBarcodeContainer();
+}
+
+function removeAllBarcodes() {
+  selectedBarcodes = [];
+  saveSelectedBarcodesToStorage();
+  updatePrintBarcodeContainer();
+}
+
+function saveSelectedBarcodesToStorage() {
+  localStorage.setItem("selectedBarcodes", JSON.stringify(selectedBarcodes));
+}
+
+function loadSelectedBarcodesFromStorage() {
+  const stored = localStorage.getItem("selectedBarcodes");
+  if (stored) {
+    selectedBarcodes = JSON.parse(stored);
+  }
 }
 
 function printAllSelectedBarcodes() {
@@ -474,6 +522,9 @@ function printAllSelectedBarcodes() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Load selected barcodes from localStorage
+  loadSelectedBarcodesFromStorage();
+
   // Load temporary changes from localStorage
   window.temporaryChanges =
     JSON.parse(localStorage.getItem("temporaryChanges")) || [];
@@ -491,6 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderProducts(products);
   generateBarcodes(products);
+  updatePrintBarcodeContainer();
 
   document
     .getElementById("search-filter")
