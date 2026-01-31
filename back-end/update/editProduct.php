@@ -3,6 +3,7 @@ ini_set('display_errors', 0);
 error_reporting(0);
 
 include '../../config/connection.php';
+require_once __DIR__ . '/../utils/skuUtils.php';
 
 function editProduct($data) {
     global $conn;
@@ -10,17 +11,27 @@ function editProduct($data) {
     // Sanitize inputs
     $originalSku = mysqli_real_escape_string($conn, $data['originalSku']);
     $name = mysqli_real_escape_string($conn, $data['name']);
-    $sku = mysqli_real_escape_string($conn, $data['sku']);
 
     // Handle category - can be either ID or name
     $category = $data['category'];
+    $categoryName = '';
+    
     if (is_numeric($category)) {
-        // It's a category ID
+        // It's a category ID - get the name for SKU generation
         $category = intval($category);
+        $categorySql = "SELECT name FROM categories WHERE id = $category LIMIT 1";
+        $categoryResult = $conn->query($categorySql);
+        if ($categoryResult && $categoryResult->num_rows > 0) {
+            $categoryRow = $categoryResult->fetch_assoc();
+            $categoryName = $categoryRow['name'];
+        } else {
+            return ['success' => false, 'message' => 'Invalid category'];
+        }
     } else {
         // It's a category name - look up the ID
-        $categoryName = mysqli_real_escape_string($conn, $category);
-        $categorySql = "SELECT id FROM categories WHERE name = '$categoryName' LIMIT 1";
+        $categoryName = $category;
+        $categoryNameEscaped = mysqli_real_escape_string($conn, $category);
+        $categorySql = "SELECT id FROM categories WHERE name = '$categoryNameEscaped' LIMIT 1";
         $categoryResult = $conn->query($categorySql);
         if ($categoryResult && $categoryResult->num_rows > 0) {
             $categoryRow = $categoryResult->fetch_assoc();
@@ -33,6 +44,10 @@ function editProduct($data) {
     $price = floatval($data['price']);
     $stock = intval($data['stock']);
     $size = mysqli_real_escape_string($conn, $data['size']);
+
+    // SKU remains unchanged - it's readonly and cannot be edited
+    // We keep the original SKU
+    $sku = $originalSku;
 
     // Handle image uploads if provided
     $images = [];
@@ -55,8 +70,8 @@ function editProduct($data) {
                 }
 
                 // Generate unique filename
-                $name = $_FILES['editProductImages']['name'][$i];
-                $extension = pathinfo($name, PATHINFO_EXTENSION);
+                $originalName = $_FILES['editProductImages']['name'][$i];
+                $extension = pathinfo($originalName, PATHINFO_EXTENSION);
                 $filename = uniqid() . '.' . $extension;
                 $uploadPath = '../../uploads/' . $filename;
 
@@ -88,19 +103,9 @@ function editProduct($data) {
         $status = 'In Stock';
     }
 
-    // Check if new SKU already exists (excluding the original SKU)
-    if ($sku !== $originalSku) {
-        $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
-        $result = $conn->query($checkSql);
-        if ($result->num_rows > 0) {
-            return ['success' => false, 'message' => 'SKU already exists'];
-        }
-    }
-
-    // Build update query
+    // Build update query - SKU is NOT updated, it remains the same
     $updateFields = [
         "name = '$name'",
-        "sku = '$sku'",
         "category = '$category'",
         "price = $price",
         "stock = $stock",
@@ -116,11 +121,12 @@ function editProduct($data) {
 
     $updateFieldsStr = implode(', ', $updateFields);
 
-    // Update query
+    // Update query - WHERE clause uses original SKU, and SKU field is not updated
     $sql = "UPDATE inventory SET $updateFieldsStr WHERE sku = '$originalSku'";
 
     if ($conn->query($sql) === TRUE) {
-        return ['success' => true, 'message' => 'Product updated successfully', 'images' => $images];
+        // Return the original SKU (unchanged)
+        return ['success' => true, 'message' => 'Product updated successfully', 'sku' => $sku, 'images' => $images];
     } else {
         error_log('Database error: ' . $conn->error);
         error_log('SQL: ' . $sql);
@@ -133,7 +139,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $data = [
         'originalSku' => $_POST['originalSku'] ?? '',
         'name' => $_POST['name'] ?? '',
-        'sku' => $_POST['sku'] ?? '',
         'category' => $_POST['category'] ?? '',
         'price' => $_POST['price'] ?? '',
         'stock' => $_POST['stock'] ?? '',
