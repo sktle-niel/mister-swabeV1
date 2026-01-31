@@ -7,8 +7,9 @@
     </div>
 
 <?php
-include 'components/editProductModal.php';
-include 'components/deleteProductModal.php';
+include __DIR__ . '/../components/editProductModal.php';
+include __DIR__ . '/../components/deleteProductModal.php';
+include __DIR__ . '/../components/skuModal.php';
 include '../../back-end/create/addProduct.php';
 include '../../back-end/read/fetchProduct.php';
 include '../../back-end/update/editProduct.php';
@@ -249,6 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <thead>
                             <tr>
                                 <th>Product</th>
+                                <th>Product Name</th>
                                 <th>SKU</th>
                                 <th>Category</th>
                                 <th>Price</th>

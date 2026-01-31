@@ -12,7 +12,7 @@ function loadCategories() {
           select.innerHTML = '<option value="">Select Category</option>';
           data.categories.forEach((category) => {
             const option = document.createElement("option");
-            option.value = category.id;
+            option.value = category.name; // Changed to use name instead of id
             option.textContent = category.name;
             select.appendChild(option);
           });
@@ -39,18 +39,36 @@ function closeEditProductModalOnOverlay(event) {
 
 function openEditProductModal(sku) {
   const product = products.find((p) => p.sku === sku);
-  if (product) {
-    document.getElementById("editProductSku").value = product.sku;
-    document.getElementById("editProductName").value = product.name;
-    document.getElementById("editProductSKU").value = product.sku;
-    document.getElementById("editProductCategory").value = product.category;
-    document.getElementById("editProductPrice").value = product.price;
-    document.getElementById("editProductStock").value = product.stock;
-    document.getElementById("editProductSize").value = product.size || "";
-    // Clear image previews
-    document.getElementById("editImagePreview").innerHTML = "";
-    document.getElementById("editProductModalOverlay").style.display = "flex";
+  if (!product) return;
+
+  const skuElement = document.getElementById("editProductSku");
+  const nameElement = document.getElementById("editProductName");
+  const categoryElement = document.getElementById("editProductCategory");
+  const priceElement = document.getElementById("editProductPrice");
+  const stockElement = document.getElementById("editProductStock");
+  const sizeElement = document.getElementById("editProductSize");
+  const overlay = document.getElementById("editProductModalOverlay");
+
+  if (
+    !skuElement ||
+    !nameElement ||
+    !categoryElement ||
+    !priceElement ||
+    !stockElement ||
+    !overlay
+  ) {
+    console.error("Edit Product Modal elements not found in DOM");
+    return;
   }
+
+  skuElement.value = product.sku;
+  nameElement.value = product.name;
+  categoryElement.value = product.category;
+  priceElement.value = product.price;
+  stockElement.value = product.stock;
+  sizeElement.value = product.size || "";
+
+  overlay.style.display = "flex";
 }
 
 function handleEditDragOver(event) {
@@ -146,20 +164,37 @@ function updateProduct() {
     return;
   }
 
-  const originalSku = document.getElementById("editProductSku").value;
-  const name = document.getElementById("editProductName").value.trim();
-  const sku = document.getElementById("editProductSKU").value.trim();
-  const category = document.getElementById("editProductCategory").value;
-  const price = document
-    .getElementById("editProductPrice")
-    .value.trim()
-    .replace("₱", "");
-  const stock = parseInt(document.getElementById("editProductStock").value);
-  const size = document.getElementById("editProductSize").value.trim();
+  // Get form elements using form.elements for better scoping
+  const skuElement = form.elements["editProductSku"];
+  const nameElement = form.elements["editProductName"];
+  const categoryElement = form.elements["editProductCategory"];
+  const priceElement = form.elements["editProductPrice"];
+  const stockElement = form.elements["editProductStock"];
+  const sizeElement = form.elements["editProductSize"];
 
-  // Check if new SKU already exists (excluding the current product)
-  if (sku !== originalSku && products.some((p) => p.sku === sku)) {
-    alert("A product with this SKU already exists!");
+  // Validate all required elements exist
+  if (
+    !skuElement ||
+    !nameElement ||
+    !categoryElement ||
+    !priceElement ||
+    !stockElement
+  ) {
+    console.error("Missing required form elements");
+    alert("Form error: Missing required fields");
+    return;
+  }
+
+  const originalSku = skuElement.value;
+  const name = nameElement.value.trim();
+  const category = categoryElement.value;
+  const price = priceElement.value.trim().replace("₱", "");
+  const stock = parseInt(stockElement.value);
+  const size = sizeElement ? sizeElement.value.trim() : "";
+
+  // Validate required fields
+  if (!originalSku || !name || !category || !price || isNaN(stock)) {
+    alert("Please fill in all required fields");
     return;
   }
 
@@ -167,16 +202,17 @@ function updateProduct() {
   const formData = new FormData();
   formData.append("originalSku", originalSku);
   formData.append("name", name);
-  formData.append("sku", sku);
   formData.append("category", category);
   formData.append("price", price);
   formData.append("stock", stock);
   formData.append("size", size);
 
   // Append image files
-  const imageInput = document.getElementById("editProductImages");
-  for (let i = 0; i < imageInput.files.length; i++) {
-    formData.append("editProductImages[]", imageInput.files[i]);
+  const imageInput = form.elements["editProductImages"];
+  if (imageInput && imageInput.files) {
+    for (let i = 0; i < imageInput.files.length; i++) {
+      formData.append("editProductImages[]", imageInput.files[i]);
+    }
   }
 
   // Send AJAX request to editProduct.php
@@ -198,7 +234,7 @@ function updateProduct() {
           const updatedProduct = {
             id: products[productIndex].id,
             name,
-            sku,
+            sku: data.sku || originalSku, // Use SKU from backend (should be same as original)
             category,
             price,
             stock,
@@ -216,13 +252,17 @@ function updateProduct() {
 
         // Show success message
         const successMessage = document.getElementById("successMessage");
-        const successText = successMessage.querySelector(".success-text");
-        successText.textContent = "Product Updated Successfully!";
-        successMessage.style.display = "block";
+        if (successMessage) {
+          const successText = successMessage.querySelector(".success-text");
+          if (successText) {
+            successText.textContent = "Product Updated Successfully!";
+          }
+          successMessage.style.display = "block";
 
-        setTimeout(() => {
-          successMessage.style.display = "none";
-        }, 3000);
+          setTimeout(() => {
+            successMessage.style.display = "none";
+          }, 3000);
+        }
 
         closeEditProductModal();
       } else {
@@ -231,6 +271,6 @@ function updateProduct() {
     })
     .catch((error) => {
       console.error("Error:", error);
-      alert("Error updating product");
+      alert("Error updating product: " + error.message);
     });
 }
