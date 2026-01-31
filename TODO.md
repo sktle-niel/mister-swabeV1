@@ -1,0 +1,5 @@
+- [ ] Remove subtotal form-group from initial product-row HTML in addSales.php
+- [ ] Remove subtotal div from addProductRow function innerHTML
+- [ ] Update CSS .product-row grid-template-columns to remove one column
+- [ ] Modify updateSubtotal function to remove subtotal calculation and input
+- [ ] Modify updateTotal function to calculate total based on price \* quantity per row
