@@ -149,6 +149,7 @@ $recentProduct = !empty($products) ? $products[0] : null;
 <link rel="stylesheet" href="../../../src/css/modal.css">
 <link rel="stylesheet" href="../../../src/css/successMessage.css">
 
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 <script src="../../../src/js/inventory.js"></script>
 <script>
 let products = <?php echo json_encode($products); ?>;

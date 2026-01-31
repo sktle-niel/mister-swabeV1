@@ -58,6 +58,7 @@ function renderProducts(productsToRender) {
                             <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
                         </svg>
                     </button>
+
                 </div>
             </td>
         `;
@@ -491,6 +492,65 @@ function openProductModal(mode) {
   if (mode === "add") {
     document.getElementById("addProductModalOverlay").style.display = "flex";
   }
+}
+
+function printSkuBarcode() {
+  const barcodeSvg = document.getElementById("barcode");
+  if (!barcodeSvg) {
+    console.error("Barcode element not found");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank");
+  const barcodeHtml = barcodeSvg.outerHTML;
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Product Barcode</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          padding: 20px;
+          margin: 0;
+        }
+        .barcode-container {
+          display: inline-block;
+          padding: 20px;
+          border: 1px solid #ccc;
+          border-radius: 8px;
+          background: white;
+        }
+        .barcode svg {
+          width: 300px;
+          height: auto;
+          max-width: 100%;
+        }
+        @media print {
+          body { margin: 0; }
+          .barcode-container { border: none; padding: 10px; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="barcode-container">
+        <div class="barcode">${barcodeHtml}</div>
+      </div>
+      <script>
+        window.onload = function() {
+          window.print();
+          setTimeout(function() {
+            window.close();
+          }, 100);
+        }
+      </script>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
