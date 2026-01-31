@@ -55,20 +55,8 @@ $recentProduct = !empty($products) ? $products[0] : null;
                             onblur="this.style.borderColor='#e5e7eb';">
                     </div>
 
-                    <!-- SKU -->
-                    <div>
-                        <label for="productSKU" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
-                            SKU <span style="color: #ef4444;">*</span>
-                        </label>
-                        <input type="text" id="productSKU" name="productSKU" required 
-                            placeholder="e.g., SNK-001" 
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;" 
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';" 
-                            onblur="this.style.borderColor='#e5e7eb';">
-                    </div>
-
                     <!-- Category -->
-                    <div>
+                    <div style="grid-column: span 2;">
                         <label for="productCategory" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
                             Category <span style="color: #ef4444;">*</span>
                         </label>

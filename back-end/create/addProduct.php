@@ -10,6 +10,72 @@ ini_set('error_log', '../../logs/php_errors.log');
 
 include '../../config/connection.php';
 
+/**
+ * Generate SKU automatically based on product details
+ * Format: CATEGORY-NAME-SIZE-PRICE-TIMESTAMP
+ */
+function generateSKU($name, $category, $price, $sizes) {
+    // Category code (first 3 letters, uppercase)
+    $categoryCode = strtoupper(substr($category, 0, 3));
+    
+    // Name code (first 3 letters of each word, uppercase, max 6 chars)
+    $nameWords = array_filter(explode(' ', $name));
+    $nameCode = '';
+    for ($i = 0; $i < min(count($nameWords), 2); $i++) {
+        $nameCode .= strtoupper(substr($nameWords[$i], 0, 3));
+    }
+    
+    // Size code
+    $sizeCode = 'NS'; // Default: No Size
+    if (!empty($sizes)) {
+        $sizeArray = is_array($sizes) ? $sizes : explode(',', $sizes);
+        $sizeArray = array_map('trim', $sizeArray);
+        $sizeArray = array_filter($sizeArray);
+        
+        if (count($sizeArray) === 1) {
+            // Single size
+            $sizeCode = strtoupper($sizeArray[0]);
+        } elseif (count($sizeArray) > 1) {
+            // Multiple sizes - use range (min-max)
+            // Sort sizes appropriately
+            usort($sizeArray, function($a, $b) {
+                // Numeric comparison if both are numbers
+                if (is_numeric($a) && is_numeric($b)) {
+                    return intval($a) - intval($b);
+                }
+                // String comparison otherwise
+                return strcmp($a, $b);
+            });
+            $sizeCode = strtoupper($sizeArray[0]) . '-' . strtoupper($sizeArray[count($sizeArray) - 1]);
+        }
+    }
+    
+    // Price code (remove currency symbols and decimals, take last 4 digits)
+    $priceCode = '';
+    $numericPrice = preg_replace('/[^\d]/', '', $price);
+    if (!empty($numericPrice)) {
+        $priceCode = str_pad(substr($numericPrice, -4), 4, '0', STR_PAD_LEFT);
+    }
+    
+    // Timestamp code (last 4 digits of current timestamp)
+    $timestamp = substr(time(), -4);
+    
+    // Build SKU
+    $sku = $categoryCode . '-' . $nameCode;
+    
+    if ($sizeCode !== 'NS') {
+        $sku .= '-' . $sizeCode;
+    }
+    
+    if (!empty($priceCode)) {
+        $sku .= '-' . $priceCode;
+    }
+    
+    $sku .= '-' . $timestamp;
+    
+    return $sku;
+}
+
 function addProduct($data) {
     global $conn;
 
@@ -18,7 +84,6 @@ function addProduct($data) {
 
     // Sanitize inputs
     $name = mysqli_real_escape_string($conn, $data['name']);
-    $sku = mysqli_real_escape_string($conn, $data['sku']);
     
     // Handle category - store the name directly
     $category = mysqli_real_escape_string($conn, $data['category']);
@@ -27,10 +92,22 @@ function addProduct($data) {
     $stock = intval($data['stock']);
     
     // Handle size - can be string or array
-    if (is_array($data['size'])) {
-        $size = mysqli_real_escape_string($conn, implode(', ', $data['size']));
+    $sizeData = $data['size'];
+    if (is_array($sizeData)) {
+        $size = mysqli_real_escape_string($conn, implode(', ', $sizeData));
     } else {
-        $size = mysqli_real_escape_string($conn, $data['size']);
+        $size = mysqli_real_escape_string($conn, $sizeData);
+    }
+    
+    // Generate SKU automatically
+    $sku = generateSKU($name, $category, $data['price'], $sizeData);
+    
+    // Check if SKU already exists (very unlikely with timestamp, but just in case)
+    $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
+    $result = $conn->query($checkSql);
+    if ($result && $result->num_rows > 0) {
+        // If somehow SKU exists, add additional random digits
+        $sku .= '-' . mt_rand(10, 99);
     }
 
     // Handle image uploads
@@ -54,8 +131,8 @@ function addProduct($data) {
                 }
 
                 // Generate unique filename
-                $name = $_FILES['productImages']['name'][$i];
-                $extension = pathinfo($name, PATHINFO_EXTENSION);
+                $filename_original = $_FILES['productImages']['name'][$i];
+                $extension = pathinfo($filename_original, PATHINFO_EXTENSION);
                 $filename = uniqid() . '.' . $extension;
                 $uploadPath = '../../uploads/' . $filename;
 
@@ -94,20 +171,13 @@ function addProduct($data) {
         $status = 'In Stock';
     }
 
-    // Check if SKU already exists
-    $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
-    $result = $conn->query($checkSql);
-    if ($result && $result->num_rows > 0) {
-        return ['success' => false, 'message' => 'SKU already exists'];
-    }
-
-    // Insert query - REMOVED created_at column
+    // Insert query
     $imagesJson = json_encode($images);
     $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status)
             VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$size', '$imagesJson', '$status')";
 
     if ($conn->query($sql) === TRUE) {
-        return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'images' => $images];
+        return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'sku' => $sku, 'images' => $images];
     } else {
         error_log('Database error: ' . $conn->error);
         error_log('SQL: ' . $sql);
@@ -134,7 +204,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         $data = [
             'name' => $_POST['productName'] ?? '',
-            'sku' => $_POST['productSKU'] ?? '',
             'category' => $_POST['productCategory'] ?? '',
             'price' => $_POST['productPrice'] ?? '',
             'stock' => $_POST['productStock'] ?? '',
