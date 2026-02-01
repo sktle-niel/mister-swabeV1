@@ -4,7 +4,7 @@ include '../../config/connection.php';
 function fetchProducts() {
     global $conn;
 
-    $sql = "SELECT i.id, i.name, i.sku, CASE WHEN i.category REGEXP '^[0-9]+$' THEN c.name ELSE i.category END as category_name, i.price, i.stock, i.size, i.images, i.status FROM inventory i LEFT JOIN categories c ON i.category = c.id ORDER BY i.id DESC";
+    $sql = "SELECT i.id, i.name, i.sku, CASE WHEN i.category REGEXP '^[0-9]+$' THEN c.name ELSE i.category END as category_name, i.price, i.stock, i.size, i.images, i.status, i.size_quantities FROM inventory i LEFT JOIN categories c ON i.category = c.id ORDER BY i.id DESC";
     $result = $conn->query($sql);
 
     $products = [];
@@ -28,6 +28,7 @@ function fetchProducts() {
                 'price' => '₱' . number_format($row['price'], 2),
                 'stock' => (int)$row['stock'],
                 'size' => $row['size'] ?: 'N/A',
+                'size_quantities' => $row['size_quantities'],
                 'image' => $adjustedImages[0] ?? 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90', // Use first image as main image
                 'images' => $adjustedImages, // Keep all images with adjusted paths
                 'status' => $row['status']

@@ -9,6 +9,7 @@
 <?php
 include __DIR__ . '/../components/editProductModal.php';
 include __DIR__ . '/../components/deleteProductModal.php';
+include __DIR__ . '/../components/addQuantityModal.php';
 include __DIR__ . '/../components/skuModal.php';
 include '../../back-end/create/addProduct.php';
 include '../../back-end/read/fetchProduct.php';
@@ -211,68 +212,58 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
     
-    <div style="display: grid; grid-template-columns: 1fr 320px; gap: var(--spacing-lg);">
-        <!-- Main Content -->
-        <div>
-            <div class="card">
-                <div class="products-header" style="margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="font-size: 1.125rem; font-weight: 600;">Products</h3>
-                    <div style="display: flex; gap: var(--spacing-md); align-items: center;">
-                        <button style="width: 400px; height: 41px; background: black; color: white; padding: 0.625rem 1.5rem; border: none; border-radius: var(--radius-md); font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all var(--transition-base); display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; position: relative; overflow: hidden; justify-content: center;" onclick="openProductModal('add')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            Add Product
-                        </button>
+    <div>
+        <div class="card">
+            <div class="products-header" style="margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.125rem; font-weight: 600;">Products</h3>
+                <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                    <button style="width: 400px; height: 41px; background: black; color: white; padding: 0.625rem 1.5rem; border: none; border-radius: var(--radius-md); font-family: 'Outfit', sans-serif; font-weight: 500; font-size: 0.875rem; cursor: pointer; transition: all var(--transition-base); display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; position: relative; overflow: hidden; justify-content: center;" onclick="openProductModal('add')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add Product
+                    </button>
 
-                    </div>
-                </div>
-
-                <div class="products-filters" style="margin-bottom: var(--spacing-lg); display: flex; gap: var(--spacing-md);">
-                    <input type="text" id="search-filter" placeholder="Search by name or SKU..." class="filter-select" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem;">
-
-                    <select class="filter-select" id="category-filter" >
-                        <option value="">All Categories</option>
-                    </select>
-
-                    <select class="filter-select" id="status-filter">
-                        <option value="">All Status</option>
-                        <option value="in-stock">In Stock</option>
-                        <option value="low-stock">Low Stock</option>
-                        <option value="out-of-stock">Out of Stock</option>
-                    </select>
-
-                    <button class="btn btn-secondary" style="width: 400px; height: 43px;" onclick="clearFilters()">Clear Filters</button>
-                </div>
-
-                <div class="table-container" style="max-height: 530px; overflow-y: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product</th>
-                                <th>Product Name</th>
-                                <th>SKU</th>
-                                <th>Category</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Size</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-tbody">
-                        </tbody>
-                    </table>
                 </div>
             </div>
-        </div>
-        
-        <!-- Sidebar -->
-        <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
-            <!-- Recent Activity -->
-            <div class="card">
-                <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: var(--spacing-md);">Recent Activity</h3>
+
+            <div class="products-filters" style="margin-bottom: var(--spacing-lg); display: flex; gap: var(--spacing-md);">
+                <input type="text" id="search-filter" placeholder="Search by name or SKU..." class="filter-select" style="padding: 0.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.875rem;">
+
+                <select class="filter-select" id="category-filter" >
+                    <option value="">All Categories</option>
+                </select>
+
+                <select class="filter-select" id="status-filter">
+                    <option value="">All Status</option>
+                    <option value="in-stock">In Stock</option>
+                    <option value="low-stock">Low Stock</option>
+                    <option value="out-of-stock">Out of Stock</option>
+                </select>
+
+                <button class="btn btn-secondary" style="width: 400px; height: 43px;" onclick="clearFilters()">Clear Filters</button>
+            </div>
+
+            <div class="table-container" style="max-height: 530px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Product Name</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Size</th>
+                            <th>Size Quantity</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-tbody">
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

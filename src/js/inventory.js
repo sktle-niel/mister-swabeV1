@@ -18,6 +18,33 @@ function renderProducts(productsToRender) {
           ? "badge-warning"
           : "badge-danger";
 
+    // Format size quantities for display
+    let sizeQuantitiesDisplay = "N/A";
+    if (
+      product.size_quantities &&
+      product.size_quantities !== "null" &&
+      product.size_quantities !== "{}"
+    ) {
+      try {
+        const sizeQuantities =
+          typeof product.size_quantities === "string"
+            ? JSON.parse(product.size_quantities)
+            : product.size_quantities;
+        const formattedQuantities = Object.entries(sizeQuantities)
+          .filter(([size, qty]) => qty > 0) // Only show sizes with quantity > 0
+          .map(([size, qty]) => `${size}: ${qty}`)
+          .join(", ");
+        sizeQuantitiesDisplay = formattedQuantities || "N/A";
+      } catch (e) {
+        console.log(
+          "Error parsing size_quantities:",
+          product.size_quantities,
+          e,
+        );
+        sizeQuantitiesDisplay = "N/A";
+      }
+    }
+
     row.innerHTML = `
             <td>
                 <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px; border-radius: var(--radius-md); object-fit: cover; cursor: pointer;" onclick="previewImage('${product.image}')">
@@ -28,6 +55,7 @@ function renderProducts(productsToRender) {
             <td style="font-weight: 600;">${product.price}</td>
             <td style="${stockClass ? `color: ${stockClass}; font-weight: 600;` : ""}">${product.stock}</td>
             <td>${product.size || "N/A"}</td>
+            <td style="font-size: 0.875rem;">${sizeQuantitiesDisplay}</td>
             <td><span class="badge ${statusClass}">${product.status}</span></td>
             <td>
                 <div style="display: flex; gap: var(--spacing-xs);">
@@ -37,20 +65,6 @@ function renderProducts(productsToRender) {
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                     </button>
-                    <button class="btn btn-icon btn-secondary" title="Edit" data-sku="${product.sku}" onclick="openEditProductModal(this.dataset.sku)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
-                    </button>
-                    <button class="btn btn-icon btn-secondary" title="Delete" data-sku="${product.sku}" onclick="window.productToDelete = this.dataset.sku; document.getElementById('deleteModalOverlay').style.display = 'flex';">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="3,6 5,6 21,6"></polyline>
-                            <path d="M19,6v14a2,2 0 0,1-2,2H7a2,2 0 0,1-2-2V6m3,0V4a2,2 0 0,1,2-2h4a2,2 0 0,1,2,2v2"></path>
-                            <line x1="10" y1="11" x2="10" y2="17"></line>
-                            <line x1="14" y1="11" x2="14" y2="17"></line>
-                        </svg>
-                    </button>
                     <button class="btn btn-icon btn-secondary" title="Generate" data-sku="${product.sku}" onclick="generateProduct('${product.sku}')">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="23 4 23 10 17 10"></polyline>
@@ -58,7 +72,15 @@ function renderProducts(productsToRender) {
                             <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
                         </svg>
                     </button>
-
+                    <button class="btn btn-icon btn-secondary" title="Add Quantity" onclick="openAddQuantityModal('${product.sku}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    <button class="btn btn-icon btn-secondary" title="Actions" onclick="showActionsMenu(event, '${product.sku}')" style="font-size: 18px; font-weight: bold; padding: 4px 8px;">
+                        ⋯
+                    </button>
                 </div>
             </td>
         `;
@@ -138,14 +160,14 @@ function handleScroll() {
     // Load more products (simulate by duplicating existing ones)
     const currentProducts = Array.from(tbody.children).map((row) => {
       return {
-        name: row.cells[0].textContent.trim(),
-        sku: row.cells[1].textContent.trim(),
-        category: row.cells[2].textContent.trim(),
-        price: row.cells[3].textContent.trim(),
-        stock: parseInt(row.cells[4].textContent.trim()),
-        size: row.cells[5].textContent.trim(),
-        status: row.cells[6].textContent.trim(),
-        color: row.cells[0].querySelector("div").style.background,
+        name: row.cells[1].textContent.trim(),
+        sku: row.cells[2].textContent.trim(),
+        category: row.cells[3].textContent.trim(),
+        price: row.cells[4].textContent.trim(),
+        stock: parseInt(row.cells[5].textContent.trim()),
+        size: row.cells[6].textContent.trim(),
+        status: row.cells[7].textContent.trim(),
+        image: row.cells[0].querySelector("img").src,
       };
     });
 
