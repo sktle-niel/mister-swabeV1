@@ -8,23 +8,27 @@
     <link rel="stylesheet" href="../../src/css/adminGlobal.css">
     <link rel="stylesheet" href="../../src/css/dashboard.css">
     <link rel="stylesheet" href="../../src/css/sidebar.css">
+    <link rel="stylesheet" href="../../src/css/addSales.css">
 
 <body>
     <?php //include 'components/topbar.php'; ?>
     <?php include 'components/sidebar.php'; ?>
-    <?php //include 'status/successStatus.php'; ?>
-    <?php //include 'status/invalidStatus.php'; ?>
+    <?php include 'status/successStatus.php'; ?>
+    <?php include 'status/invalidStatus.php'; ?>
 
     <?php
     $currentPage = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 
-    // Staff can access dashboard and add sales pages
+    // Staff can access dashboard, add sales, and sales pages
     switch ($currentPage) {
         case 'dashboard':
             include 'pages/dashboard.php';
             break;
         case 'addSales':
             include 'pages/addSales.php';
+            break;
+        case 'sales':
+            include 'pages/sales.php';
             break;
         default:
             include 'pages/dashboard.php';
