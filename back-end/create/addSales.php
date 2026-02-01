@@ -23,13 +23,14 @@ try {
     $stmt->execute();
 
     // Insert each product into sale_items table
-    $stmt_item = $conn->prepare("INSERT INTO sale_items (id, sale_id, product_id, quantity, price) VALUES (?, ?, ?, ?, ?)");
+    $stmt_item = $conn->prepare("INSERT INTO sale_items (id, sale_id, product_id, quantity, price, size) VALUES (?, ?, ?, ?, ?, ?)");
     foreach ($products as $product) {
         $item_id = str_pad(mt_rand(1, 9999999), 7, '0', STR_PAD_LEFT);
         $product_id = $product['id'] ?? 0;
         $quantity = $product['quantity'] ?? 0;
         $price = $product['price'] ?? 0;
-        $stmt_item->bind_param("siiid", $item_id, $sale_id, $product_id, $quantity, $price);
+        $size = $product['size'] ?? 'N/A';
+        $stmt_item->bind_param("ssiids", $item_id, $sale_id, $product_id, $quantity, $price, $size);
         $stmt_item->execute();
     }
 

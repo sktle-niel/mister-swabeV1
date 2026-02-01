@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label>Product SKU</label>
                             <div class="product-scanner">
                                 <input type="text" name="products[0][sku]" class="product-sku" placeholder="Scan barcode or enter SKU" required autocomplete="off">
-                                <button type="button" class="btn btn-icon btn-primary scan-btn">
+                                <button type="button" class="btn btn-icon scan-btn" style="background-color: #000; color: #fff;">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                                         <circle cx="12" cy="13" r="4"></circle>
@@ -82,6 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label>Quantity</label>
                             <input type="number" name="products[0][quantity]" min="1" value="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Size</label>
+                            <select name="products[0][size]" class="product-size" required>
+                                <option value="">Select Size</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -122,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Create Sale</button>
+                <button type="submit" class="btn btn-success" style="background-color: #000; color: #fff;">Create Sale</button>
                 <button type="reset" class="btn btn-secondary">Reset</button>
             </div>
         </form>
@@ -195,12 +202,30 @@ function lookupProductBySKU(sku, row) {
     }
 
     const product = products.find(p => p.sku === sku.trim());
-    
+
     if (product) {
         // Fill in the product details
         row.querySelector('.product-id').value = product.id;
         row.querySelector('input[name*="[price]"]').value = product.price;
-        
+
+        // Populate size options
+        const sizeSelect = row.querySelector('.product-size');
+        sizeSelect.innerHTML = '<option value="">Select Size</option>';
+        console.log('Product size:', product.size);
+        if (product.size && product.size !== 'N/A') {
+            const sizes = product.size.split(',');
+            console.log('Sizes array:', sizes);
+            sizes.forEach(size => {
+                const trimmedSize = size.trim();
+                if (trimmedSize) {
+                    const option = document.createElement('option');
+                    option.value = trimmedSize;
+                    option.textContent = trimmedSize;
+                    sizeSelect.appendChild(option);
+                }
+            });
+        }
+
         // Display product name
         const nameDisplay = row.querySelector('.product-name-display');
         if (nameDisplay) {
@@ -208,10 +233,10 @@ function lookupProductBySKU(sku, row) {
             nameDisplay.style.color = 'green';
             nameDisplay.style.fontWeight = 'bold';
         }
-        
+
         // Update total
         updateTotal();
-        
+
         // Visual feedback
         const skuInput = row.querySelector('.product-sku');
         skuInput.style.borderColor = 'green';
@@ -220,18 +245,18 @@ function lookupProductBySKU(sku, row) {
         }, 2000);
     } else {
         // Product not found
-        alert('Product not found with SKU: ' + sku);
-        
+
         // Clear fields
         row.querySelector('.product-id').value = '';
         row.querySelector('input[name*="[price]"]').value = '';
-        
+        row.querySelector('.product-size').innerHTML = '<option value="">Select Size</option>';
+
         const nameDisplay = row.querySelector('.product-name-display');
         if (nameDisplay) {
             nameDisplay.textContent = 'Product not found';
             nameDisplay.style.color = 'red';
         }
-        
+
         // Visual feedback
         const skuInput = row.querySelector('.product-sku');
         skuInput.style.borderColor = 'red';
@@ -503,13 +528,14 @@ window.onclick = function(event) {
 
 .product-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
     gap: var(--spacing-md);
-    align-items: start;
+    align-items: flex-start;
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
+    background-color: #f8f9fa;
 }
 
 .products-section {
@@ -649,7 +675,7 @@ window.onclick = function(event) {
 .btn {
     padding: var(--spacing-sm) var(--spacing-md);
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
@@ -660,21 +686,22 @@ window.onclick = function(event) {
 }
 
 .btn-primary {
-    background-color: var(--primary-color, #007bff);
+    background-color: black;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-color-dark, #0056b3);
+    background-color: #333;
 }
 
 .btn-secondary {
-    background-color: var(--secondary-color, #6c757d);
-    color: white;
+    background-color: white;
+    color: black;
+    border: 1px solid #ccc;
 }
 
 .btn-secondary:hover {
-    background-color: var(--secondary-color-dark, #545b62);
+    background-color: #f8f9fa;
 }
 
 .btn-danger {
@@ -688,5 +715,9 @@ window.onclick = function(event) {
 
 .btn-icon {
     padding: var(--spacing-xs);
+}
+
+.remove-product {
+    margin-top: 24px;
 }
 </style>
