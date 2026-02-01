@@ -106,7 +106,7 @@ function editProduct($data) {
     // Build update query - SKU is NOT updated, it remains the same
     $updateFields = [
         "name = '$name'",
-        "category = '$category'",
+        "category = '$categoryName'",
         "price = $price",
         "stock = $stock",
         "size = '$size'",
