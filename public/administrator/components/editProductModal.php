@@ -62,17 +62,7 @@ $closeFunction = $closeFunction ?? 'closeEditProductModal';
                             onblur="this.style.borderColor='#e5e7eb';">
                     </div>
 
-                    <!-- Stock -->
-                    <div>
-                        <label for="editProductStock" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
-                            Stock Quantity <span style="color: #ef4444;">*</span>
-                        </label>
-                        <input type="number" id="editProductStock" name="editProductStock" min="0" required
-                            placeholder="0"
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
-                            onblur="this.style.borderColor='#e5e7eb';">
-                    </div>
+
 
                     <!-- Size -->
                     <div style="grid-column: span 2;">
@@ -180,7 +170,6 @@ function openEditProductModal(sku) {
   const nameElement = document.getElementById("editProductName");
   const categoryElement = document.getElementById("editProductCategory");
   const priceElement = document.getElementById("editProductPrice");
-  const stockElement = document.getElementById("editProductStock");
   const sizeElement = document.getElementById("editProductSize");
   const overlay = document.getElementById("editProductModalOverlay");
 
@@ -189,7 +178,6 @@ function openEditProductModal(sku) {
     !nameElement ||
     !categoryElement ||
     !priceElement ||
-    !stockElement ||
     !overlay
   ) {
     console.error("Edit Product Modal elements not found in DOM");
@@ -200,7 +188,6 @@ function openEditProductModal(sku) {
   nameElement.value = product.name;
   categoryElement.value = product.category;
   priceElement.value = product.price;
-  stockElement.value = product.stock;
   sizeElement.value = product.size || "";
 
   overlay.style.display = "flex";
@@ -304,7 +291,6 @@ function updateProduct() {
   const nameElement = form.elements["editProductName"];
   const categoryElement = form.elements["editProductCategory"];
   const priceElement = form.elements["editProductPrice"];
-  const stockElement = form.elements["editProductStock"];
   const sizeElement = form.elements["editProductSize"];
 
   // Validate all required elements exist
@@ -312,8 +298,7 @@ function updateProduct() {
     !skuElement ||
     !nameElement ||
     !categoryElement ||
-    !priceElement ||
-    !stockElement
+    !priceElement
   ) {
     console.error("Missing required form elements");
     alert("Form error: Missing required fields");
@@ -324,11 +309,10 @@ function updateProduct() {
   const name = nameElement.value.trim();
   const category = categoryElement.value;
   const price = priceElement.value.trim().replace("₱", "");
-  const stock = parseInt(stockElement.value);
   const size = sizeElement ? sizeElement.value.trim() : "";
 
   // Validate required fields
-  if (!originalSku || !name || !category || !price || isNaN(stock)) {
+  if (!originalSku || !name || !category || !price) {
     alert("Please fill in all required fields");
     return;
   }
@@ -339,7 +323,6 @@ function updateProduct() {
   formData.append("name", name);
   formData.append("category", category);
   formData.append("price", price);
-  formData.append("stock", stock);
   formData.append("size", size);
 
   // Append image files
@@ -361,19 +344,14 @@ function updateProduct() {
         // Update the local products array
         const productIndex = products.findIndex((p) => p.sku === originalSku);
         if (productIndex !== -1) {
-          // Determine status based on stock
-          let status = "In Stock";
-          if (stock === 0) status = "Out of Stock";
-          else if (stock <= 10) status = "Low Stock";
-
           const updatedProduct = {
             id: products[productIndex].id,
             name,
             sku: data.sku || originalSku, // Use SKU from backend (should be same as original)
             category,
             price,
-            stock,
-            status,
+            stock: products[productIndex].stock, // Keep original stock
+            status: products[productIndex].status, // Keep original status
             image:
               data.images && data.images.length > 0
                 ? data.images[0]

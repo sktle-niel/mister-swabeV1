@@ -150,13 +150,13 @@ function renderSizeInputs(sizes) {
       <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
         Size: ${sizeData.size}
       </label>
-      <input type="number" 
-             class="size-quantity-input" 
-             data-sku="${sizeData.sku}" 
+      <input type="number"
+             class="size-quantity-input"
+             data-sku="${sizeData.sku}"
              data-size="${sizeData.size}"
-             min="0" 
-             value="0"
-             placeholder="Quantity to add for ${sizeData.size}"
+             min="0"
+             value="${sizeData.stock || 0}"
+             placeholder="Current: ${sizeData.stock || 0}, enter quantity to add for ${sizeData.size}"
              style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
              onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
              onblur="this.style.borderColor='#e5e7eb';">
@@ -220,8 +220,8 @@ function processQuantityUpdates(updates, index, submitBtn) {
     }, 3000);
 
     closeAddQuantityModal();
-    
-    // Reload products
+
+    // Reload products to get updated stock values
     location.reload();
     return;
   }

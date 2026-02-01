@@ -83,29 +83,18 @@ $recentProduct = !empty($products) ? $products[0] : null;
                             onblur="this.style.borderColor='#e5e7eb';">
                     </div>
 
-                    <!-- Stock -->
-                    <div>
-                        <label for="productStock" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
-                            Stock Quantity <span style="color: #ef4444;">*</span>
-                        </label>
-                        <input type="number" id="productStock" name="productStock" min="0" required 
-                            placeholder="0" 
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;" 
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';" 
-                            onblur="this.style.borderColor='#e5e7eb';">
-                    </div>
+
 
                     <!-- Size -->
                     <div style="grid-column: span 2;">
-                        <label for="productSize" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
+                        <label for="productSizes" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
                             Available Sizes
                         </label>
-                        <input type="text" id="productSize" name="productSize" 
-                            placeholder="e.g., S, M, L, XL or 7, 8, 9, 10" 
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;" 
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';" 
+                        <input type="text" id="productSizes" name="productSizes" placeholder="Enter sizes separated by commas (e.g., S,M,L,XL)" required
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
                             onblur="this.style.borderColor='#e5e7eb';">
-                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Separate multiple sizes with commas</p>
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Enter sizes separated by commas</p>
                     </div>
 
                     <!-- Product Images -->
