@@ -1,3 +1,6 @@
+let currentPage = 1;
+const itemsPerPage = 7;
+
 function renderProducts(productsToRender) {
   const tbody = document.getElementById("products-tbody");
   tbody.innerHTML = "";
@@ -89,6 +92,69 @@ function renderProducts(productsToRender) {
   });
 }
 
+function renderPagination(totalItems, currentPage, itemsPerPage) {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const paginationContainer = document.getElementById("pagination-container");
+
+  if (totalPages <= 1) {
+    paginationContainer.innerHTML = "";
+    return;
+  }
+
+  let paginationHTML =
+    '<div style="display: flex; justify-content: center; align-items: center; gap: var(--spacing-sm); margin-top: var(--spacing-lg);">';
+
+  // Previous button
+  if (currentPage > 1) {
+    paginationHTML += `<button class="btn btn-secondary" onclick="changePage(${currentPage - 1})">Previous</button>`;
+  }
+
+  // Page numbers
+  const startPage = Math.max(1, currentPage - 2);
+  const endPage = Math.min(totalPages, currentPage + 2);
+
+  if (startPage > 1) {
+    paginationHTML += `<button class="btn btn-secondary" onclick="changePage(1)">1</button>`;
+    if (startPage > 2) {
+      paginationHTML += "<span>...</span>";
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const isActive = i === currentPage;
+    const buttonStyle = isActive
+      ? "background: black; color: white; border: 1px solid black;"
+      : "";
+    paginationHTML += `<button class="btn btn-secondary" style="${buttonStyle}" onclick="changePage(${i})">${i}</button>`;
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      paginationHTML += "<span>...</span>";
+    }
+    paginationHTML += `<button class="btn btn-secondary" onclick="changePage(${totalPages})">${totalPages}</button>`;
+  }
+
+  // Next button
+  if (currentPage < totalPages) {
+    paginationHTML += `<button class="btn btn-secondary" onclick="changePage(${currentPage + 1})">Next</button>`;
+  }
+
+  paginationHTML += "</div>";
+  paginationContainer.innerHTML = paginationHTML;
+}
+
+function changePage(page) {
+  currentPage = page;
+  filterProducts();
+}
+
+function getPaginatedProducts(products) {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return products.slice(startIndex, endIndex);
+}
+
 function filterProducts() {
   const searchFilter = document
     .getElementById("search-filter")
@@ -123,14 +189,17 @@ function filterProducts() {
     );
   }
 
-  renderProducts(filteredProducts);
+  const paginatedProducts = getPaginatedProducts(filteredProducts);
+  renderProducts(paginatedProducts);
+  renderPagination(filteredProducts.length, currentPage, itemsPerPage);
 }
 
 function clearFilters() {
   document.getElementById("search-filter").value = "";
   document.getElementById("category-filter").value = "";
   document.getElementById("status-filter").value = "";
-  renderProducts(products);
+  currentPage = 1;
+  filterProducts();
 }
 
 function filterActivities() {
@@ -147,34 +216,6 @@ function filterActivities() {
       item.style.display = "none";
     }
   });
-}
-
-function handleScroll() {
-  const tableContainer = document.querySelector(".table-container");
-  const tbody = document.getElementById("products-tbody");
-
-  if (
-    tableContainer.scrollTop + tableContainer.clientHeight >=
-    tableContainer.scrollHeight - 10
-  ) {
-    // Load more products (simulate by duplicating existing ones)
-    const currentProducts = Array.from(tbody.children).map((row) => {
-      return {
-        name: row.cells[1].textContent.trim(),
-        sku: row.cells[2].textContent.trim(),
-        category: row.cells[3].textContent.trim(),
-        price: row.cells[4].textContent.trim(),
-        stock: parseInt(row.cells[5].textContent.trim()),
-        size: row.cells[6].textContent.trim(),
-        status: row.cells[7].textContent.trim(),
-        image: row.cells[0].querySelector("img").src,
-      };
-    });
-
-    // Add more products (duplicate for demo)
-    const additionalProducts = currentProducts.slice(0, 5);
-    renderProducts([...currentProducts, ...additionalProducts], false);
-  }
 }
 
 function showActionsMenu(event, sku) {
@@ -481,7 +522,7 @@ function addProduct() {
         };
         products.push(newProduct);
         localStorage.setItem("inventoryProducts", JSON.stringify(products));
-        renderProducts(products);
+        filterProducts();
 
         // Show success message
         const successMessage = document.getElementById("successMessage");
@@ -591,7 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  renderProducts(products);
+  filterProducts();
 
   document
     .getElementById("search-filter")
@@ -608,7 +649,8 @@ document.addEventListener("DOMContentLoaded", () => {
     activitySearch.addEventListener("input", filterActivities);
   }
 
-  document
-    .querySelector(".table-container")
-    .addEventListener("scroll", handleScroll);
+  // Debug scroll event
+  document.querySelector(".table-container").addEventListener("scroll", () => {
+    console.log("Scroll event triggered on table-container");
+  });
 });
