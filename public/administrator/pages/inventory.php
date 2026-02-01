@@ -151,7 +151,7 @@ $recentProduct = !empty($products) ? $products[0] : null;
 <link rel="stylesheet" href="../../../src/css/successMessage.css">
 
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-<script src="../../../src/js/inventory.js"></script>
+<script src="../../../src/js/inventory.js?v=<?php echo time(); ?>"></script>
 <script>
 let products = <?php echo json_encode($products); ?>;
 
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button class="btn btn-secondary" style="width: 400px; height: 43px;" onclick="clearFilters()">Clear Filters</button>
             </div>
 
-            <div class="table-container" style="max-height: 530px; overflow-y: auto;">
+            <div class="table-container" style="overflow: hidden;">
                 <table>
                     <thead>
                         <tr>
@@ -265,6 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </tbody>
                 </table>
             </div>
+            <div id="pagination-container"></div>
         </div>
     </div>
 </div>

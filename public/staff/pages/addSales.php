@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         <div class="form-group">
                             <label>Size</label>
-                            <select name="products[0][size]" class="product-size" required>
+                            <select name="products[0][size]" class="product-size">
                                 <option value="">Select Size</option>
                             </select>
                         </div>
@@ -211,20 +211,42 @@ function lookupProductBySKU(sku, row) {
         // Populate size options
         const sizeSelect = row.querySelector('.product-size');
         sizeSelect.innerHTML = '<option value="">Select Size</option>';
-        console.log('Product size:', product.size);
-        if (product.size && product.size !== 'N/A') {
-            const sizes = product.size.split(',');
-            console.log('Sizes array:', sizes);
-            sizes.forEach(size => {
-                const trimmedSize = size.trim();
-                if (trimmedSize) {
-                    const option = document.createElement('option');
-                    option.value = trimmedSize;
-                    option.textContent = trimmedSize;
-                    sizeSelect.appendChild(option);
+        
+        // Fetch sizes from getSizes.php
+        fetch(`../../back-end/read/getSizes.php?sku=${encodeURIComponent(sku)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.sizes.length > 0) {
+                    data.sizes.forEach(sizeData => {
+                        if (sizeData.stock > 0) {
+                            const option = document.createElement('option');
+                            option.value = sizeData.size;
+                            option.textContent = `${sizeData.size} (${sizeData.stock})`;
+                            sizeSelect.appendChild(option);
+                        }
+                    });
+                    // Make size required if sizes are available
+                    if (sizeSelect.options.length > 1) {
+                        sizeSelect.setAttribute('required', 'required');
+                        sizeSelect.dataset.hasSizes = 'true';
+                    } else {
+                        // No sizes with stock available
+                        sizeSelect.removeAttribute('required');
+                        sizeSelect.dataset.hasSizes = 'false';
+                    }
+                } else {
+                    // No sizes available, make size optional
+                    sizeSelect.removeAttribute('required');
+                    sizeSelect.dataset.hasSizes = 'false';
+                    console.log('No sizes available for this product');
                 }
+            })
+            .catch(error => {
+                console.error('Error fetching sizes:', error);
+                // On error, make size optional
+                sizeSelect.removeAttribute('required');
+                sizeSelect.dataset.hasSizes = 'false';
             });
-        }
 
         // Display product name
         const nameDisplay = row.querySelector('.product-name-display');
@@ -249,7 +271,11 @@ function lookupProductBySKU(sku, row) {
         // Clear fields
         row.querySelector('.product-id').value = '';
         row.querySelector('input[name*="[price]"]').value = '';
-        row.querySelector('.product-size').innerHTML = '<option value="">Select Size</option>';
+        
+        const sizeSelect = row.querySelector('.product-size');
+        sizeSelect.innerHTML = '<option value="">Select Size</option>';
+        sizeSelect.removeAttribute('required');
+        sizeSelect.dataset.hasSizes = 'false';
 
         const nameDisplay = row.querySelector('.product-name-display');
         if (nameDisplay) {
@@ -335,7 +361,7 @@ function addProductRow() {
             <label>Product SKU</label>
             <div class="product-scanner">
                 <input type="text" name="products[${rowCount}][sku]" class="product-sku" placeholder="Scan barcode or enter SKU" required autocomplete="off">
-                <button type="button" class="btn btn-icon btn-primary scan-btn">
+                <button type="button" class="btn btn-icon scan-btn" style="background-color: #000; color: #fff;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
                         <circle cx="12" cy="13" r="4"></circle>
@@ -348,6 +374,12 @@ function addProductRow() {
         <div class="form-group">
             <label>Quantity</label>
             <input type="number" name="products[${rowCount}][quantity]" min="1" value="1" required>
+        </div>
+        <div class="form-group">
+            <label>Size</label>
+            <select name="products[${rowCount}][size]" class="product-size">
+                <option value="">Select Size</option>
+            </select>
         </div>
         <div class="form-group">
             <label>Price</label>
@@ -427,18 +459,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validate that all products have valid IDs
         const rows = document.querySelectorAll('.product-row');
         let isValid = true;
+        let errorMessage = '';
         
-        rows.forEach(row => {
+        rows.forEach((row, index) => {
             const productId = row.querySelector('.product-id').value;
+            const sizeSelect = row.querySelector('.product-size');
+            const skuInput = row.querySelector('.product-sku');
+            
+            // Check if product is valid
             if (!productId) {
                 isValid = false;
-                const skuInput = row.querySelector('.product-sku');
+                errorMessage = 'Please ensure all products are valid';
                 skuInput.style.borderColor = 'red';
+                return;
+            }
+            
+            // Check if size is required and not selected
+            if (sizeSelect.hasAttribute('required') && sizeSelect.dataset.hasSizes === 'true' && !sizeSelect.value) {
+                isValid = false;
+                errorMessage = `Please select a size for product in row ${index + 1}`;
+                sizeSelect.style.borderColor = 'red';
+                setTimeout(() => {
+                    sizeSelect.style.borderColor = '';
+                }, 3000);
+                return;
             }
         });
         
         if (!isValid) {
-            alert('Please ensure all products are valid');
+            alert(errorMessage);
             return;
         }
         
@@ -461,9 +510,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.lastChild.remove();
                 }
                 
-                // Clear product displays
+                // Clear product displays and reset size selects
                 document.querySelectorAll('.product-name-display').forEach(display => {
                     display.textContent = '';
+                });
+                
+                document.querySelectorAll('.product-size').forEach(select => {
+                    select.innerHTML = '<option value="">Select Size</option>';
+                    select.removeAttribute('required');
+                    select.dataset.hasSizes = 'false';
                 });
                 
                 updateTotal();
@@ -482,6 +537,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.product-name-display').forEach(display => {
             display.textContent = '';
         });
+        
+        // Reset size selects
+        document.querySelectorAll('.product-size').forEach(select => {
+            select.innerHTML = '<option value="">Select Size</option>';
+            select.removeAttribute('required');
+            select.dataset.hasSizes = 'false';
+        });
+        
         updateTotal();
     });
 });

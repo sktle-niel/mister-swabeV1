@@ -14,6 +14,34 @@ $products = $_POST['products'] ?? [];
 $conn->begin_transaction();
 
 try {
+    // Validate stock availability for each product
+    foreach ($products as $product) {
+        $product_id = $product['id'] ?? 0;
+        $quantity = $product['quantity'] ?? 0;
+        $size = $product['size'] ?? 'N/A';
+
+        if ($size !== 'N/A' && $quantity > 0) {
+            // Fetch current size_quantities
+            $stmt_check = $conn->prepare("SELECT size_quantities FROM inventory WHERE id = ?");
+            $stmt_check->bind_param("i", $product_id);
+            $stmt_check->execute();
+            $result = $stmt_check->get_result();
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $size_quantities = json_decode($row['size_quantities'] ?? '{}', true);
+
+                // Check if requested quantity is available
+                $available_stock = $size_quantities[$size] ?? 0;
+                if ($quantity > $available_stock) {
+                    throw new Exception("Insufficient stock for size $size. Available: $available_stock, Requested: $quantity");
+                }
+            } else {
+                throw new Exception("Product not found in inventory");
+            }
+            $stmt_check->close();
+        }
+    }
+
     // Generate 7-digit sale id
     $sale_id = str_pad(mt_rand(1, 9999999), 7, '0', STR_PAD_LEFT);
 
@@ -33,6 +61,38 @@ try {
         $stmt_item->bind_param("ssiids", $item_id, $sale_id, $product_id, $quantity, $price, $size);
         $stmt_item->execute();
     }
+
+    // Update inventory stock for each sold product
+    $stmt_update = $conn->prepare("UPDATE inventory SET size_quantities = ? WHERE id = ?");
+    foreach ($products as $product) {
+        $product_id = $product['id'] ?? 0;
+        $quantity = $product['quantity'] ?? 0;
+        $size = $product['size'] ?? 'N/A';
+
+        if ($size !== 'N/A' && $quantity > 0) {
+            // Fetch current size_quantities
+            $stmt_fetch = $conn->prepare("SELECT size_quantities FROM inventory WHERE id = ?");
+            $stmt_fetch->bind_param("i", $product_id);
+            $stmt_fetch->execute();
+            $result = $stmt_fetch->get_result();
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $size_quantities = json_decode($row['size_quantities'] ?? '{}', true);
+
+                // Deduct the sold quantity from the selected size
+                if (isset($size_quantities[$size])) {
+                    $size_quantities[$size] = max(0, $size_quantities[$size] - $quantity);
+                }
+
+                // Update the size_quantities in inventory
+                $updated_quantities = json_encode($size_quantities);
+                $stmt_update->bind_param("si", $updated_quantities, $product_id);
+                $stmt_update->execute();
+            }
+            $stmt_fetch->close();
+        }
+    }
+    $stmt_update->close();
 
     $conn->commit();
     echo json_encode(['success' => true]);
