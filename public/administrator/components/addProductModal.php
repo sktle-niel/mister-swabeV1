@@ -51,35 +51,23 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
                     </select>
                 </div>
 
-                <!-- Price and Stock Quantity (Side by Side) -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                    <div>
-                        <label for="productPrice" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
-                            Price <span style="color: red;">*</span>
-                        </label>
-                        <input type="text" id="productPrice" name="productPrice" placeholder="₱0.00" required 
-                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                    </div>
-
-                    <div>
-                        <label for="productStock" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
-                            Stock Quantity <span style="color: red;">*</span>
-                        </label>
-                        <input type="number" id="productStock" name="productStock" placeholder="0" min="0" required 
-                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
-                    </div>
+                <!-- Price -->
+                <div style="margin-bottom: 20px;">
+                    <label for="productPrice" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
+                        Price <span style="color: red;">*</span>
+                    </label>
+                    <input type="text" id="productPrice" name="productPrice" placeholder="₱0.00" required
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
                 </div>
 
                 <!-- Available Sizes (Full Width) -->
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
+                    <label for="productSizes" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
                         Available Sizes
                     </label>
-                    <div id="sizeButtons" 
-                         style="display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; min-height: 50px; box-sizing: border-box;">
-                        <span id="sizePlaceholder" style="color: #999; font-style: italic; font-size: 14px;">Select a category to choose sizes</span>
-                    </div>
-                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Click to select multiple sizes</small>
+                    <input type="text" id="productSizes" name="productSizes" placeholder="Enter sizes separated by commas (e.g., S,M,L,XL)" required
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Enter sizes separated by commas</small>
                 </div>
 
                 <!-- Product Images (Full Width) -->

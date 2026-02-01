@@ -39,18 +39,27 @@ try {
     $row = $result->fetch_assoc();
     $sizeQuantities = json_decode($row['size_quantities'] ?? '{}', true);
 
-    // Update the quantity for the specific size
-    if (!isset($sizeQuantities[$size])) {
-        $sizeQuantities[$size] = 0;
+    // Set the quantity for the specific size to the new value
+    $sizeQuantities[$size] = $amount;
+
+    // Calculate new total stock
+    $newStock = array_sum($sizeQuantities);
+
+    // Determine new status based on stock
+    if ($newStock == 0) {
+        $newStatus = 'Out of Stock';
+    } elseif ($newStock <= 10) {
+        $newStatus = 'Low Stock';
+    } else {
+        $newStatus = 'In Stock';
     }
-    $sizeQuantities[$size] += $amount;
 
     // Encode back to JSON
     $updatedSizeQuantities = json_encode($sizeQuantities);
 
-    // Update the database
-    $updateStmt = $conn->prepare("UPDATE inventory SET size_quantities = ? WHERE sku = ?");
-    $updateStmt->bind_param("ss", $updatedSizeQuantities, $baseSku);
+    // Update the database with size_quantities, stock, and status
+    $updateStmt = $conn->prepare("UPDATE inventory SET size_quantities = ?, stock = ?, status = ? WHERE sku = ?");
+    $updateStmt->bind_param("siss", $updatedSizeQuantities, $newStock, $newStatus, $baseSku);
 
     if ($updateStmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Quantity added successfully']);
