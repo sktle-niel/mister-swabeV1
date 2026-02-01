@@ -6,7 +6,6 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../../config/connection.php';
 
-$customer_name = $_POST['customerName'] ?? '';
 $total_amount = $_POST['totalAmount'] ?? 0;
 $payment_method = $_POST['paymentMethod'] ?? '';
 $products = $_POST['products'] ?? [];
@@ -46,8 +45,8 @@ try {
     $sale_id = str_pad(mt_rand(1, 9999999), 7, '0', STR_PAD_LEFT);
 
     // Insert into sales table
-    $stmt = $conn->prepare("INSERT INTO sales (id, customer_name, total_amount, payment_method) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("ssds", $sale_id, $customer_name, $total_amount, $payment_method);
+    $stmt = $conn->prepare("INSERT INTO sales (id, total_amount, payment_method) VALUES (?, ?, ?)");
+    $stmt->bind_param("sds", $sale_id, $total_amount, $payment_method);
     $stmt->execute();
 
     // Insert each product into sale_items table
