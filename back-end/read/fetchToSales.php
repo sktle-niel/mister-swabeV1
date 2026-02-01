@@ -6,8 +6,8 @@ require_once '../../config/connection.php';
 
 try {
     // Query to get all products from inventory
-    // Make sure to select: id, sku, name, price
-    $query = "SELECT id, sku, name, price FROM inventory";
+    // Make sure to select: id, sku, name, price, size
+    $query = "SELECT id, sku, name, price, size FROM inventory";
     
     $result = $conn->query($query);
     
@@ -22,7 +22,8 @@ try {
             'id' => $row['id'],
             'sku' => trim($row['sku']), // Important: trim whitespace
             'name' => $row['name'],
-            'price' => floatval($row['price'])
+            'price' => floatval($row['price']),
+            'size' => $row['size'] ?: 'N/A'
         );
     }
     
