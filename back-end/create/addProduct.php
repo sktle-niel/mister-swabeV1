@@ -29,20 +29,20 @@ function addProduct($data) {
     // Handle size - can be string or array
     $sizeData = $data['size'];
     if (is_array($sizeData)) {
-        $size = mysqli_real_escape_string($conn, implode(', ', $sizeData));
+        $sizeString = implode(', ', $sizeData);
     } else {
-        $size = mysqli_real_escape_string($conn, $sizeData);
+        $sizeString = $sizeData;
     }
-    
-    // Generate SKU automatically
-    $sku = generateSKU($name, $category, $data['price'], $sizeData);
-    
-    // Check if SKU already exists (very unlikely with timestamp, but just in case)
-    $checkSql = "SELECT id FROM inventory WHERE sku = '$sku'";
+
+    // Generate base SKU automatically
+    $baseSku = generateSKU($name, $category, $data['price'], $sizeData);
+
+    // Check if base SKU already exists (very unlikely with timestamp, but just in case)
+    $checkSql = "SELECT id FROM inventory WHERE sku LIKE '$baseSku%'";
     $result = $conn->query($checkSql);
     if ($result && $result->num_rows > 0) {
         // If somehow SKU exists, add additional random digits
-        $sku .= '-' . mt_rand(10, 99);
+        $baseSku .= '-' . mt_rand(10, 99);
     }
 
     // Handle image uploads
@@ -106,18 +106,37 @@ function addProduct($data) {
         $status = 'In Stock';
     }
 
-    // Insert query
+    // Insert queries
     $imagesJson = json_encode($images);
-    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status)
-            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$size', '$imagesJson', '$status')";
+    $sizeArray = array_map('trim', explode(',', $sizeString));
 
-    if ($conn->query($sql) === TRUE) {
-        return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'sku' => $sku, 'images' => $images];
+    if (!empty($sizeArray) && count($sizeArray) > 1) {
+        // Multiple sizes - create separate rows for each size
+        foreach ($sizeArray as $size) {
+            $size = mysqli_real_escape_string($conn, $size);
+            $sizeSku = $baseSku . '-' . $size;
+            $sizeId = str_pad(mt_rand(0, 9999999), 7, '0', STR_PAD_LEFT);
+            $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status)
+                    VALUES ('$sizeId', '$name', '$sizeSku', '$category', $price, $stock, '$size', '$imagesJson', '$status')";
+            if (!$conn->query($sql)) {
+                error_log('Database error: ' . $conn->error);
+                error_log('SQL: ' . $sql);
+                return ['success' => false, 'message' => 'Database error: ' . $conn->error];
+            }
+        }
     } else {
-        error_log('Database error: ' . $conn->error);
-        error_log('SQL: ' . $sql);
-        return ['success' => false, 'message' => 'Database error: ' . $conn->error];
+        // Single size or no size
+        $size = mysqli_real_escape_string($conn, $sizeString);
+        $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, images, status)
+                VALUES ('$id', '$name', '$baseSku', '$category', $price, $stock, '$size', '$imagesJson', '$status')";
+        if (!$conn->query($sql)) {
+            error_log('Database error: ' . $conn->error);
+            error_log('SQL: ' . $sql);
+            return ['success' => false, 'message' => 'Database error: ' . $conn->error];
+        }
     }
+
+    return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'sku' => $baseSku, 'images' => $images];
 }
 
 // Handle POST request
