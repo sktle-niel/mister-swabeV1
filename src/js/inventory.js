@@ -411,15 +411,32 @@ function confirmDelete() {
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          // Remove from local products array
-          const index = products.findIndex(
-            (p) => p.sku === window.productToDelete,
-          );
-          if (index !== -1) {
-            products.splice(index, 1);
-            localStorage.setItem("inventoryProducts", JSON.stringify(products));
-            filterProducts(); // Re-apply current filters to update the UI
-          }
+          // Reload products from server to ensure UI is updated
+          fetch("../../../back-end/read/fetchProduct.php")
+            .then((response) => response.json())
+            .then((data) => {
+              products = data;
+              localStorage.setItem(
+                "inventoryProducts",
+                JSON.stringify(products),
+              );
+              filterProducts(); // Re-apply current filters to update the UI
+            })
+            .catch((error) => {
+              console.error("Error reloading products:", error);
+              // Fallback: remove from local array
+              const index = products.findIndex(
+                (p) => p.sku === window.productToDelete,
+              );
+              if (index !== -1) {
+                products.splice(index, 1);
+                localStorage.setItem(
+                  "inventoryProducts",
+                  JSON.stringify(products),
+                );
+                filterProducts();
+              }
+            });
 
           // Show success message
           const successMessage = document.getElementById("successMessage");
@@ -520,7 +537,7 @@ function addProduct() {
                 : "In Stock",
           image:
             data.images && data.images.length > 0
-              ? data.images[0]
+              ? "../../../" + data.images[0]
               : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90",
           size: sizesInput || "N/A",
           size_quantities: data.size_quantities,
