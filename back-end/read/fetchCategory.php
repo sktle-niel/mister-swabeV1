@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 include '../../config/connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $stmt = $conn->prepare("SELECT id, name FROM categories ORDER BY name ASC");
+    $stmt = $conn->prepare("SELECT c.id, c.name, COUNT(i.id) as productCount FROM categories c LEFT JOIN inventory i ON c.name = i.category GROUP BY c.id, c.name ORDER BY c.name ASC");
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $categories[] = [
             'id' => $row['id'],
             'name' => $row['name'],
-            'productCount' => 0 // Placeholder, can be calculated later if needed
+            'productCount' => (int)$row['productCount']
         ];
     }
 

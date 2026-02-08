@@ -1,4 +1,4 @@
-<?php
+to<?php
 require_once '../../config/connection.php';
 
 // Query total orders
@@ -6,10 +6,20 @@ $totalOrdersQuery = "SELECT COUNT(*) as total FROM sales";
 $totalOrdersResult = $conn->query($totalOrdersQuery);
 $totalOrders = $totalOrdersResult->fetch_assoc()['total'];
 
-// For simplicity, set pending, processing to 0, delivered to total
-$pending = 0;
-$processing = 0;
-$delivered = $totalOrders;
+// Query today's sales
+$todaySalesQuery = "SELECT COUNT(*) as today FROM sales WHERE DATE(created_at) = CURDATE()";
+$todaySalesResult = $conn->query($todaySalesQuery);
+$todaySales = $todaySalesResult->fetch_assoc()['today'];
+
+// Query this week's sales
+$thisWeekSalesQuery = "SELECT COUNT(*) as this_week FROM sales WHERE YEARWEEK(created_at) = YEARWEEK(CURDATE())";
+$thisWeekSalesResult = $conn->query($thisWeekSalesQuery);
+$thisWeekSales = $thisWeekSalesResult->fetch_assoc()['this_week'];
+
+// Query this month's sales
+$thisMonthSalesQuery = "SELECT COUNT(*) as this_month FROM sales WHERE YEAR(created_at) = YEAR(CURDATE()) AND MONTH(created_at) = MONTH(CURDATE())";
+$thisMonthSalesResult = $conn->query($thisMonthSalesQuery);
+$thisMonthSales = $thisMonthSalesResult->fetch_assoc()['this_month'];
 
 // Query recent orders (last 5)
 $recentOrdersQuery = "SELECT s.id, s.total_amount, s.payment_method, s.created_at, GROUP_CONCAT(CONCAT(COALESCE(i.name, 'Unknown Product'), ' (Qty: ', si.quantity, ', Size: ', si.size, ')') SEPARATOR ', ') as products
@@ -146,28 +156,28 @@ function confirmVoid() {
         <div class="stat-card" style="--stat-color: #10b981;">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">Pending</div>
+                    <div class="stat-label">Today's Sales</div>
                 </div>
             </div>
-            <div class="stat-value">45</div>
+            <div class="stat-value"><?php echo number_format($todaySales); ?></div>
         </div>
         
         <div class="stat-card" style="--stat-color: #3b82f6;">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">Processing</div>
+                    <div class="stat-label">This Week's Sales</div>
                 </div>
             </div>
-            <div class="stat-value"><?php echo number_format($processing); ?></div>
+            <div class="stat-value"><?php echo number_format($thisWeekSales); ?></div>
         </div>
         
         <div class="stat-card" style="--stat-color: #10b981;">
             <div class="stat-header">
                 <div>
-                    <div class="stat-label">Delivered</div>
+                    <div class="stat-label">This Month's Sales</div>
                 </div>
             </div>
-            <div class="stat-value"><?php echo number_format($delivered); ?></div>
+            <div class="stat-value"><?php echo number_format($thisMonthSales); ?></div>
         </div>
     </div>
     
