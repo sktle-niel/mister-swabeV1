@@ -1,5 +1,0 @@
-- [x] Remove non-existent stock input reference in addProduct.js
-- [x] Add validation to ensure at least one size is selected before submitting
-- [x] Modify addProduct.php to set sizeString to 'N/A' if no sizes are selected
-- [x] Update inventory.php modal to use text input for sizes
-- [x] Update inventory.js to handle text input for sizes

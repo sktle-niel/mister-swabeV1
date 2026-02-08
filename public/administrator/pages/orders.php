@@ -1,3 +1,129 @@
+<?php
+require_once '../../config/connection.php';
+
+// Query total orders
+$totalOrdersQuery = "SELECT COUNT(*) as total FROM sales";
+$totalOrdersResult = $conn->query($totalOrdersQuery);
+$totalOrders = $totalOrdersResult->fetch_assoc()['total'];
+
+// For simplicity, set pending, processing to 0, delivered to total
+$pending = 0;
+$processing = 0;
+$delivered = $totalOrders;
+
+// Query recent orders (last 5)
+$recentOrdersQuery = "SELECT s.id, s.total_amount, s.payment_method, s.created_at, GROUP_CONCAT(CONCAT(COALESCE(i.name, 'Unknown Product'), ' (Qty: ', si.quantity, ', Size: ', si.size, ')') SEPARATOR ', ') as products
+                      FROM sales s
+                      LEFT JOIN sale_items si ON s.id = si.sale_id
+                      LEFT JOIN inventory i ON si.product_id = i.id
+                      GROUP BY s.id
+                      ORDER BY s.created_at DESC
+                      LIMIT 5";
+$recentOrdersResult = $conn->query($recentOrdersQuery);
+$recentOrders = $recentOrdersResult->fetch_all(MYSQLI_ASSOC);
+?>
+
+<!-- Void Confirmation Modal -->
+<div class="modal-overlay" id="voidModalOverlay" onclick="closeVoidModalOnOverlay(event)" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 10000;">
+    <div class="modal-content" style="max-width: 500px; width: 90%; background: white; border-radius: 16px; padding: 0; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);" onclick="event.stopPropagation();">
+        <!-- Modal Header -->
+        <div style="padding: 30px 40px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: white; z-index: 10; border-radius: 16px 16px 0 0;">
+            <button class="close-btn" onclick="closeVoidModal()" style="position: absolute; top: 20px; right: 25px; background: none; border: none; font-size: 28px; cursor: pointer; color: #9ca3af; line-height: 1; transition: color 0.2s;" onmouseover="this.style.color='#374151'" onmouseout="this.style.color='#9ca3af'">×</button>
+            <h2 style="margin: 0 0 8px 0; font-size: 28px; font-weight: 700; color: #111827;">Void Sale</h2>
+            <p style="margin: 0; color: #6b7280; font-size: 15px; line-height: 1.5;">
+                Are you sure you want to void this sale? This action cannot be undone.
+            </p>
+        </div>
+
+        <!-- Modal Body -->
+        <div style="padding: 40px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 48px; color: #ef4444; margin-bottom: 15px;">⚠️</div>
+            </div>
+
+            <!-- Void Reason Input -->
+            <div style="margin-bottom: 20px;">
+                <label for="voidReason" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
+                    Void Reason <span style="color: #ef4444;">*</span>
+                </label>
+                <textarea id="voidReason" name="voidReason" required
+                    placeholder="Enter the reason for voiding this sale..."
+                    style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s; resize: vertical; min-height: 80px;"
+                    onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
+                    onblur="this.style.borderColor='#e5e7eb';"></textarea>
+            </div>
+
+            <!-- Modal Footer -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                <button type="button" onclick="closeVoidModal()" style="padding: 12px 28px; background: #f3f4f6; color: #374151; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">Cancel</button>
+                <button type="button" onclick="confirmVoid()" style="padding: 12px 32px; background: #ef4444; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);" onmouseover="this.style.background='#dc2626'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)'" onmouseout="this.style.background='#ef4444'; this.style.boxShadow='0 1px 3px rgba(0, 0, 0, 0.1)'">Void Sale</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentSaleId = null;
+
+function openVoidModal(saleId) {
+    currentSaleId = saleId;
+    document.getElementById('voidReason').value = '';
+    document.getElementById('voidModalOverlay').style.display = 'flex';
+}
+
+function closeVoidModal() {
+    document.getElementById('voidModalOverlay').style.display = 'none';
+    currentSaleId = null;
+}
+
+function closeVoidModalOnOverlay(event) {
+    if (event.target === document.getElementById('voidModalOverlay')) {
+        closeVoidModal();
+    }
+}
+
+function confirmVoid() {
+    const voidReason = document.getElementById('voidReason').value.trim();
+    if (!voidReason) {
+        alert('Please enter a void reason.');
+        return;
+    }
+
+    if (!currentSaleId) {
+        alert('No sale selected.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('sale_id', currentSaleId);
+    formData.append('void_reason', voidReason);
+
+    fetch('../../back-end/create/voidSale.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(text => {
+        try {
+            const data = JSON.parse(text);
+            if (data.success) {
+                alert('Sale voided successfully.');
+                closeVoidModal();
+                location.reload();
+            } else {
+                alert('Failed to void sale: ' + data.message);
+            }
+        } catch (e) {
+            alert('Server error: ' + text);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while voiding the sale.');
+    });
+}
+</script>
+
 <div class="main-content">
     <div class="content-header">
         <div>
@@ -14,7 +140,7 @@
                     <div class="stat-label">Total Orders</div>
                 </div>
             </div>
-            <div class="stat-value">1,945</div>
+            <div class="stat-value"><?php echo number_format($totalOrders); ?></div>
         </div>
         
         <div class="stat-card" style="--stat-color: #10b981;">
@@ -32,7 +158,7 @@
                     <div class="stat-label">Processing</div>
                 </div>
             </div>
-            <div class="stat-value">128</div>
+            <div class="stat-value"><?php echo number_format($processing); ?></div>
         </div>
         
         <div class="stat-card" style="--stat-color: #10b981;">
@@ -41,7 +167,7 @@
                     <div class="stat-label">Delivered</div>
                 </div>
             </div>
-            <div class="stat-value">1,772</div>
+            <div class="stat-value"><?php echo number_format($delivered); ?></div>
         </div>
     </div>
     
@@ -55,145 +181,36 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
+                        <th>Sale ID</th>
+                        <th>Product Information</th>
+                        <th>Total Amount</th>
+                        <th>Payment Method</th>
                         <th>Date</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php foreach ($recentOrders as $order): ?>
                     <tr>
-                        <td style="font-weight: 600; color: var(--accent-primary);">ORD-001</td>
-                        <td>John Doe</td>
-                        <td>2025-01-28</td>
-                        <td>2</td>
-                        <td style="font-weight: 600;">₱1,599</td>
-                        <td><span class="badge badge-success">Delivered</span></td>
+                        <td style="font-weight: 600; color: black;"><?php echo $order['id']; ?></td>
+                        <td><?php echo $order['products']; ?></td>
+                        <td style="font-weight: 600;">₱<?php echo number_format($order['total_amount'], 0); ?></td>
+                        <td><?php echo $order['payment_method']; ?></td>
+                        <td><?php echo date('m/d/Y', strtotime($order['created_at'])); ?></td>
                         <td>
                             <div style="display: flex; gap: var(--spacing-sm);">
-                                <button class="btn btn-icon btn-secondary" title="View">
+                                <button class="btn btn-icon btn-danger" title="Void" onclick="openVoidModal(<?php echo $order['id']; ?>)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-icon btn-secondary" title="Print">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                        <rect x="6" y="14" width="12" height="8"></rect>
+                                        <path d="M3 6h18"></path>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
                                     </svg>
                                 </button>
                             </div>
                         </td>
                     </tr>
-                    
-                    <tr>
-                        <td style="font-weight: 600; color: var(--accent-primary);">ORD-002</td>
-                        <td>Jane Smith</td>
-                        <td>2025-01-28</td>
-                        <td>3</td>
-                        <td style="font-weight: 600;">₱2,498</td>
-                        <td><span class="badge badge-info">Processing</span></td>
-                        <td>
-                            <div style="display: flex; gap: var(--spacing-sm);">
-                                <button class="btn btn-icon btn-secondary" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-icon btn-secondary" title="Print">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                        <rect x="6" y="14" width="12" height="8"></rect>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td style="font-weight: 600; color: var(--accent-primary);">ORD-003</td>
-                        <td>Mike Johnson</td>
-                        <td>2025-01-27</td>
-                        <td>1</td>
-                        <td style="font-weight: 600;">₱999</td>
-                        <td><span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">Shipped</span></td>
-                        <td>
-                            <div style="display: flex; gap: var(--spacing-sm);">
-                                <button class="btn btn-icon btn-secondary" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-icon btn-secondary" title="Print">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                        <rect x="6" y="14" width="12" height="8"></rect>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td style="font-weight: 600; color: var(--accent-primary);">ORD-004</td>
-                        <td>Sarah Williams</td>
-                        <td>2025-01-27</td>
-                        <td>4</td>
-                        <td style="font-weight: 600;">₱3,297</td>
-                        <td><span class="badge badge-success">Delivered</span></td>
-                        <td>
-                            <div style="display: flex; gap: var(--spacing-sm);">
-                                <button class="btn btn-icon btn-secondary" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-icon btn-secondary" title="Print">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                        <rect x="6" y="14" width="12" height="8"></rect>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <tr>
-                        <td style="font-weight: 600; color: var(--accent-primary);">ORD-005</td>
-                        <td>David Brown</td>
-                        <td>2025-01-26</td>
-                        <td>2</td>
-                        <td style="font-weight: 600;">₱1,748</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
-                        <td>
-                            <div style="display: flex; gap: var(--spacing-sm);">
-                                <button class="btn btn-icon btn-secondary" title="View">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                                <button class="btn btn-icon btn-secondary" title="Print">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                        <rect x="6" y="14" width="12" height="8"></rect>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
