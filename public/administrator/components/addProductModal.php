@@ -65,7 +65,7 @@ $closeFunction = $closeFunction ?? 'closeAddProductModal';
                     <label for="productSizes" style="display: block; margin-bottom: 5px; font-weight: 500; font-size: 14px;">
                         Available Sizes
                     </label>
-                    <input type="text" id="productSizes" name="productSizes" placeholder="Enter sizes separated by commas (e.g., S,M,L,XL)" required
+                    <input type="text" id="productSizes" name="productSizes" placeholder="Enter sizes separated by commas (e.g., S,M,L,XL)"
                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
                     <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">Enter sizes separated by commas</small>
                 </div>
