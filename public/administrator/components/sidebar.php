@@ -51,7 +51,7 @@
             Categories
         </a>
         
-        <a href="?page=customers" class="nav-item <?php echo ($currentPage == 'customers') ? 'active' : ''; ?>">
+        <a href="?page=accounts" class="nav-item <?php echo ($currentPage == 'accounts') ? 'active' : ''; ?>">
             <span class="nav-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -60,7 +60,7 @@
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                 </svg>
             </span>
-            Customers
+            Accounts
         </a>
         
         <a href="?page=printSku" class="nav-item <?php echo ($currentPage == 'printSku') ? 'active' : ''; ?>">

@@ -204,7 +204,7 @@ function confirmVoid() {
                     <tr>
                         <td style="font-weight: 600; color: black;"><?php echo $order['id']; ?></td>
                         <td><?php echo $order['products']; ?></td>
-                        <td style="font-weight: 600;">₱<?php echo number_format($order['total_amount'], 0); ?></td>
+                        <td style="font-weight: 600; color: black;">₱<?php echo number_format($order['total_amount'], 0); ?></td>
                         <td><?php echo $order['payment_method']; ?></td>
                         <td><?php echo date('m/d/Y', strtotime($order['created_at'])); ?></td>
                         <td>

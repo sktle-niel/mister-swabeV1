@@ -35,7 +35,7 @@
         case 'categories':
             include 'pages/categories.php';
             break;
-        case 'customers':
+        case 'accounts':
             include 'pages/customers.php';
             break;
         case 'printSku':
