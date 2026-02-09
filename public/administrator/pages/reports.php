@@ -1,3 +1,12 @@
+<?php
+require_once '../../config/connection.php';
+
+// Query today's total sales
+$todaySalesQuery = "SELECT SUM(total_amount) as total FROM sales WHERE DATE(created_at) = CURDATE()";
+$todaySalesResult = $conn->query($todaySalesQuery);
+$todayTotal = $todaySalesResult->fetch_assoc()['total'] ?? 0;
+?>
+
 <div class="main-content">
     <div class="content-header">
         <div>
@@ -74,18 +83,11 @@
                             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                         </svg>
                     </div>
-                    <button class="btn btn-icon btn-secondary" title="Download" onclick="showToast('success', 'Downloading Sales Report...')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                    </button>
                 </div>
                 <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: var(--spacing-xs);">Sales Report</h4>
-                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: var(--spacing-md);">Comprehensive sales analysis for the month</p>
-                <p style="font-size: 0.75rem; color: var(--text-muted);">2025-01-29</p>
-                <button class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-md);" onclick="showToast('info', 'Generating Sales Report...')">Generate</button>
+                <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: var(--spacing-md);">Today's sales: <span style="color: black; font-weight: bold;">₱<?php echo number_format($todayTotal, 2); ?></span></p>
+                <p style="font-size: 0.75rem; color: var(--text-muted);"><?php echo date('Y-m-d'); ?></p>
+                <button class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-md);" onclick="window.location.href='../../../back-end/download/salesReport.php'">Download</button>
             </div>
             
             <!-- Inventory Report -->

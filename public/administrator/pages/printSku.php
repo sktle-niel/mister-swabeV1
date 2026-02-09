@@ -1,8 +1,8 @@
 <div class="main-content">
     <div class="content-header">
         <div>
-            <h2 class="page-title">Inventory Management</h2>
-            <p class="page-subtitle">Manage your product inventory and stock levels</p>
+            <h2 class="page-title">Print SKU Barcode</h2>
+            <p class="page-subtitle">Generate SKU to Barcode</p>
         </div>
     </div>
 

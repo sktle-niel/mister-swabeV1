@@ -109,7 +109,7 @@ include 'components/skuScanner.php';
             row.innerHTML = `
                 <td>${sale.sale_id}</td>
                 <td>${productsList}</td>
-                <td>₱${parseFloat(sale.total_amount).toFixed(2)}</td>
+                <td style="color: black;">₱${parseFloat(sale.total_amount).toFixed(2)}</td>
                 <td>${sale.payment_method}</td>
                 <td>${new Date(sale.created_at).toLocaleDateString()}</td>
             `;
