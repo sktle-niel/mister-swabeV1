@@ -91,17 +91,19 @@
               sizeSelect.dataset.hasSizes = "false";
             }
           } else {
-            // No sizes available, make size optional
+            // No sizes available, make size optional and hide
             sizeSelect.removeAttribute("required");
             sizeSelect.dataset.hasSizes = "false";
+            sizeSelect.closest(".form-group").style.display = "none";
             console.log("No sizes available for this product");
           }
         })
         .catch((error) => {
           console.error("Error fetching sizes:", error);
-          // On error, make size optional
+          // On error, make size optional and hide
           sizeSelect.removeAttribute("required");
           sizeSelect.dataset.hasSizes = "false";
+          sizeSelect.closest(".form-group").style.display = "none";
         });
 
       // Display product name
@@ -425,6 +427,47 @@
       });
   });
 
+  // Fetch and display sale details
+  async function fetchSaleDetails(saleId) {
+    try {
+      const response = await fetch(
+        `../../back-end/read/fetchSale.php?sale_id=${saleId}`,
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        displaySaleDetails(data.sale);
+      } else {
+        console.error("Error fetching sale details:", data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching sale details:", error);
+    }
+  }
+
+  // Display sale details in the right-side panel
+  function displaySaleDetails(sale) {
+    document.getElementById("saleId").textContent = sale.id;
+    document.getElementById("saleTotal").textContent = parseFloat(
+      sale.total_amount,
+    ).toFixed(2);
+    document.getElementById("salePayment").textContent = sale.payment_method;
+    document.getElementById("saleDate").textContent = new Date(
+      sale.created_at,
+    ).toLocaleString();
+
+    const productsList = document.getElementById("saleProducts");
+    productsList.innerHTML = "";
+    sale.items.forEach((item) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<strong>${item.name}</strong> (SKU: ${item.sku}) - Qty: ${item.quantity}, Size: ${item.size}, Price: ₱${parseFloat(item.price).toFixed(2)}`;
+      productsList.appendChild(li);
+    });
+
+    document.getElementById("saleDetails").style.display = "block";
+    document.getElementById("noSaleMessage").style.display = "none";
+  }
+
   // Close modal when clicking outside
   window.onclick = function (event) {
     const modal = document.getElementById("scannerModal");
@@ -432,4 +475,4 @@
       window.closeScanner();
     }
   };
-})(); // End of IIFE
+})();

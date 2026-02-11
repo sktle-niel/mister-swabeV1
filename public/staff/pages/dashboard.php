@@ -22,7 +22,7 @@ function getTotalSales($period) {
 }
 
 // Get recent sales
-function getRecentSales($limit = 5) {
+function getRecentSales() {
     global $conn;
     $query = "SELECT s.id, s.total_amount, s.payment_method, s.created_at,
                      GROUP_CONCAT(CONCAT(i.name, ' (Qty: ', si.quantity, ')') SEPARATOR ', ') as products
@@ -31,7 +31,20 @@ function getRecentSales($limit = 5) {
               LEFT JOIN inventory i ON si.product_id = i.id
               GROUP BY s.id
               ORDER BY s.created_at DESC
-              LIMIT $limit";
+              LIMIT 5";
+    $result = $conn->query($query);
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Get top product by total quantity sold
+function getTopProducts() {
+    global $conn;
+    $query = "SELECT i.name, SUM(si.quantity) as total_quantity
+              FROM sale_items si
+              LEFT JOIN inventory i ON si.product_id = i.id
+              GROUP BY si.product_id
+              ORDER BY total_quantity DESC
+              LIMIT 1";
     $result = $conn->query($query);
     return $result->fetch_all(MYSQLI_ASSOC);
 }
@@ -42,6 +55,7 @@ $totalToday = getTotalSales('today');
 $totalWeek = getTotalSales('week');
 $totalMonth = getTotalSales('month');
 $recentSales = getRecentSales();
+$topProducts = getTopProducts();
 ?>
 <div class="main-content">
     <div class="content-header">
@@ -64,14 +78,13 @@ $recentSales = getRecentSales();
                     <div class="stat-label">Today's Sales</div>
                 </div>
                 <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <text x="10" y="14" text-anchor="middle" font-size="14" fill="currentColor">₱</text>
                     </svg>
                 </div>
             </div>
             <div class="stat-value">₱<?php echo number_format($totalToday, 2); ?></div>
-            <div class="stat-change positive">Sales today</div>
+            <div class="stat-change positive" style="color: black;">Sales today</div>
         </div>
 
         <div class="stat-card" style="--stat-color: #10b981;">
@@ -89,7 +102,7 @@ $recentSales = getRecentSales();
                 </div>
             </div>
             <div class="stat-value">₱<?php echo number_format($totalWeek, 2); ?></div>
-            <div class="stat-change positive">This week</div>
+            <div class="stat-change positive" style="color: black;">This week</div>
         </div>
 
         <div class="stat-card" style="--stat-color: #ec4899;">
@@ -108,7 +121,7 @@ $recentSales = getRecentSales();
                 </div>
             </div>
             <div class="stat-value">₱<?php echo number_format($totalMonth, 2); ?></div>
-            <div class="stat-change positive">This month</div>
+            <div class="stat-change positive" style="color: black;">This month</div>
         </div>
 
         <div class="stat-card" style="--stat-color: #f59e0b;">
@@ -123,7 +136,7 @@ $recentSales = getRecentSales();
                 </div>
             </div>
             <div class="stat-value"><?php echo $topProducts[0]['name'] ?? 'N/A'; ?></div>
-            <div class="stat-change positive"><?php echo $topProducts[0]['total_quantity'] ?? 0; ?> units sold</div>
+            <div class="stat-change positive" style="color: black;"><?php echo $topProducts[0]['total_quantity'] ?? 0; ?> units sold</div>
         </div>
     </div>
 
