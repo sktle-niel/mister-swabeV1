@@ -94,7 +94,7 @@ try {
     $stmt_update->close();
 
     $conn->commit();
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'sale_id' => $sale_id]);
 } catch (Exception $e) {
     $conn->rollback();
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);

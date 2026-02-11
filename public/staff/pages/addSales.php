@@ -46,12 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="main-content">
     <div class="content-header">
         <div>
-            <h2 class="page-title">Add Sales</h2>
+            <h2 class="page-title">Point of Sale</h2>
             <p class="page-subtitle">Create a new sales transaction</p>
         </div>
     </div>
 
-    <div class="card" style="max-width: 800px;">
+    <div class="card">
         <div class="card-header">
             <h3>Sales Information</h3>
         </div>

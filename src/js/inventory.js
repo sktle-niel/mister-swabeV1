@@ -68,7 +68,7 @@ function renderProducts(productsToRender) {
                             <circle cx="12" cy="12" r="3"></circle>
                         </svg>
                     </button>
-                    <button class="btn btn-icon btn-secondary" title="Add Quantity" onclick="openAddQuantityModal('${product.sku}')">
+                    <button class="btn btn-icon btn-secondary" title="Add Quantity" ${product.size === "N/A" ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ""} onclick="${product.size !== "N/A" ? `openAddQuantityModal('${product.sku}')` : ""}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
