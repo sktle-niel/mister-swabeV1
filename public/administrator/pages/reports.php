@@ -13,59 +13,8 @@ $todayTotal = $todaySalesResult->fetch_assoc()['total'] ?? 0;
             <h2 class="page-title">Reports</h2>
             <p class="page-subtitle">Generate and download business reports</p>
         </div>
-        <button class="btn btn-primary" onclick="showToast('info', 'Schedule report feature coming soon')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            Schedule Report
-        </button>
     </div>
     
-    <!-- Report Stats -->
-    <div class="stats-grid" style="margin-bottom: var(--spacing-2xl);">
-        <div class="stat-card" style="--stat-color: #6366f1;">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-label">Reports Generated</div>
-                </div>
-            </div>
-            <div class="stat-value">142</div>
-            <div class="stat-change positive">This month</div>
-        </div>
-        
-        <div class="stat-card" style="--stat-color: #10b981;">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-label">Scheduled Reports</div>
-                </div>
-            </div>
-            <div class="stat-value">8</div>
-            <div class="stat-change positive">Active</div>
-        </div>
-        
-        <div class="stat-card" style="--stat-color: #10b981;">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-label">Last Generated</div>
-                </div>
-            </div>
-            <div class="stat-value">Today</div>
-            <div class="stat-change positive">09:30 AM</div>
-        </div>
-        
-        <div class="stat-card" style="--stat-color: #22d3ee;">
-            <div class="stat-header">
-                <div>
-                    <div class="stat-label">Storage Used</div>
-                </div>
-            </div>
-            <div class="stat-value">2.4 GB</div>
-            <div class="stat-change positive">Of 10 GB</div>
-        </div>
-    </div>
     
     <!-- Quick Generate -->
     <div class="card" style="margin-bottom: var(--spacing-2xl);">
