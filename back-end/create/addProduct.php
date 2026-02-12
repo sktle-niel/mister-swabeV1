@@ -24,7 +24,8 @@ function addProduct($data) {
     $category = mysqli_real_escape_string($conn, $data['category']);
     
     $price = floatval($data['price']);
-    
+    $stock = 0; // Default stock to 0 since no stock field in modal
+
     // Handle size - create size_quantities with 0 for each selected size
     $sizesInput = isset($_POST['productSizes']) ? trim($_POST['productSizes']) : '';
     $sizeData = [];
@@ -33,7 +34,6 @@ function addProduct($data) {
         $sizeData = array_filter($sizeData, function($size) { return !empty($size); });
     }
     $sizeQuantities = [];
-    $stock = 0;
     $sizeString = '';
     if (!empty($sizeData)) {
         foreach ($sizeData as $size) {
@@ -149,12 +149,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Handle size data from array
         $sizeData = isset($_POST['productSize']) && is_array($_POST['productSize']) ? $_POST['productSize'] : [];
 
-        $data = [
+        $data = array(
             'name' => $_POST['productName'] ?? '',
             'category' => $_POST['productCategory'] ?? '',
             'price' => $_POST['productPrice'] ?? '',
             'size' => json_encode($sizeData)
-        ];
+        );
 
         $response = addProduct($data);
         echo json_encode($response);
