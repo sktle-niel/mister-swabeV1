@@ -76,14 +76,12 @@ $recentProduct = !empty($products) ? $products[0] : null;
                         <label for="productPrice" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
                             Price <span style="color: #ef4444;">*</span>
                         </label>
-                        <input type="text" id="productPrice" name="productPrice" required 
-                            placeholder="₱0.00" 
-                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;" 
-                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';" 
+                        <input type="text" id="productPrice" name="productPrice" required
+                            placeholder="₱0.00"
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
                             onblur="this.style.borderColor='#e5e7eb';">
                     </div>
-
-
 
                     <!-- Size -->
                     <div style="grid-column: span 2;">

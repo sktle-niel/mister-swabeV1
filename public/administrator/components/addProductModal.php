@@ -1,4 +1,4 @@
-<?php
+taf<?php
 // Default values for the add product modal
 $modalId = $modalId ?? 'addProductModal';
 $title = $title ?? 'Add New Product';
