@@ -1,4 +1,6 @@
 <?php
+include '../../auth/sessionCheck.php';
+
 include '../../back-end/read/fetchCustomers.php';
 $customers = fetchCustomers();
 ?>

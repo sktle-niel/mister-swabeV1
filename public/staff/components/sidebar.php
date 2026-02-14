@@ -42,11 +42,6 @@
     </nav>
     
     <div class="panel-footer">
-        <div class="help-section">
-            <div class="help-title">Need Help?</div>
-            <p class="help-text">Check our documentation</p>
-            <button class="help-button">View Docs</button>
-        </div>
         <a href="../../auth/logout.php" class="nav-item"  style="margin-top: 20px;">
             <span class="nav-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

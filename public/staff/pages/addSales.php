@@ -2,6 +2,7 @@
 include 'components/skuScanner.php';
 include 'status/successStatus.php';
 include 'status/invalidStatus.php';
+include '../../auth/sessionCheck.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');

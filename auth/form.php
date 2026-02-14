@@ -5,18 +5,28 @@ include '../back-end/read/fetchLogin.php';
 
 $current_view = isset($_GET['view']) ? $_GET['view'] : 'initial';
 
+// Store email in session when user enters it
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['temp_email'])) {
+    $_SESSION['temp_email'] = $_POST['temp_email'];
+    header('Location: ?view=create');
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_account'])) {
     $email = $_POST['create_email'];
     $password = $_POST['create_password'];
     $confirm_password = $_POST['confirm_password'];
+    $user_type = $_POST['user_type']; // Get user type from form
+    
     if ($password !== $confirm_password) {
         $_SESSION['create_error'] = 'Passwords do not match';
         header('Location: ?view=create');
         exit();
     } else {
-        $result = createAccount($email, $password);
+        $result = createAccount($email, $password, $user_type);
         if ($result['success']) {
             $_SESSION['create_success'] = $result['message'];
+            unset($_SESSION['temp_email']); // Clear temp email
             header('Location: ?view=initial');
             exit();
         } else {
@@ -35,7 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     if ($result['success']) {
         // Redirect based on user type
         if ($_SESSION['user_type'] == 'administrator') {
-            header('Location: ../public/administrator/');
+            header('Location: ../public/administrator/main.php');
+        } elseif ($_SESSION['user_type'] == 'staff') {
+            header('Location: ../public/staff/main.php?page=dashboard');
         } else {
             header('Location: ../public/customer/main.php');
         }
@@ -54,6 +66,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Mr. Swabe Apparel</title>
     <link rel="stylesheet" href="../src/css/forAuth.css">
+    <style>
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: white;
+            cursor: pointer;
+        }
+        
+        .input-group select:focus {
+            outline: none;
+            border-color: #333;
+        }
+    </style>
 </head>
 <body>
     <?php include 'status/success.php'; ?>
@@ -64,21 +92,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
             <p>& COLLECTIONS</p>
         </div>
         <div class="login-header">
-            <h2 id="headerTitle"><?php echo $current_view == 'login' ? 'Login' : ($current_view == 'create' ? 'Create Password' : 'Sign in'); ?></h2>
-            <p id="headerSubtitle"><?php echo $current_view == 'login' ? 'Enter username and password' : ($current_view == 'create' ? 'Set up your account password' : 'Sign in or <a href="#">create an account</a>'); ?></p>
+            <h2 id="headerTitle"><?php echo $current_view == 'login' ? 'Login' : ($current_view == 'create' ? 'Create Account' : 'Sign in'); ?></h2>
+            <p id="headerSubtitle"><?php echo $current_view == 'login' ? 'Enter username and password' : ($current_view == 'create' ? 'Set up your account' : 'Sign in or <a href="#">create an account</a>'); ?></p>
         </div>
         
         <!-- Initial View -->
         <div id="initialView" <?php echo $current_view != 'initial' ? 'class="hidden"' : ''; ?>>
-            <button class="btn-shop" onclick="showLoginForm()">Continue with Shop</button>
+            <button class="btn-shop" onclick="showLoginForm()">Continue with Login</button>
             <div class="divider">
                 <span>or</span>
             </div>
-            <form>
+            <form method="post">
                 <div class="input-group">
-                    <input type="email" id="emailOnly" placeholder="Email" required>
+                    <input type="email" name="temp_email" id="emailOnly" placeholder="Email" required>
                 </div>
-                <button type="button" onclick="handleEmailContinue()" class="btn-continue">Continue</button>
+                <button type="submit" class="btn-continue">Continue</button>
             </form>
         </div>
         
@@ -119,7 +147,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                 Create a strong password for your account.
             </div>
             <form method="post">
-                <input type="hidden" id="createEmailHidden" name="create_email">
+                <div class="input-group">
+                    <input type="email" name="create_email" placeholder="Email" value="<?php echo isset($_SESSION['temp_email']) ? htmlspecialchars($_SESSION['temp_email']) : ''; ?>" readonly style="background-color: #f5f5f5;">
+                </div>
+                
+                <div class="input-group">
+                    <select id="userType" name="user_type" required>
+                        <option value="">Select Account Type</option>
+                        <option value="staff">Staff</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                
                 <div class="input-group">
                     <input type="password" id="createPassword" name="create_password" placeholder="Password" required>
                     <small id="passwordHelp" class="form-text">Password must be at least 8 characters with uppercase and lowercase letters.</small>
@@ -131,11 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                 <button type="submit" name="create_account" class="btn-continue">Create Account</button>
                 <button type="button" class="btn-back" onclick="showInitialView()">Back</button>
             </form>
-        </div>
-        
-        <div class="footer-links">
-            <a href="#">Privacy policy</a>
-            <a href="#">Terms of service</a>
         </div>
     </div>
 

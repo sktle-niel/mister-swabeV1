@@ -29,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
     if ($result['success']) {
         // Redirect based on user type
         if ($_SESSION['user_type'] == 'administrator') {
-            header('Location: ../public/administrator/');
+            header('Location: ../public/administrator/main.php');
         } else {
-            header('Location: ../public/customer/main.php');
+            header('Location: ../public/staff/main.php');
         }
         exit();
     } else {

@@ -1,5 +1,6 @@
  <?php
 require_once '../../config/connection.php';
+include '../../auth/sessionCheck.php';
 
 // Function to get total sales for a period
 function getTotalSales($period) {

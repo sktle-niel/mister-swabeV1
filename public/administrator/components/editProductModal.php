@@ -77,7 +77,21 @@ $closeFunction = $closeFunction ?? 'closeEditProductModal';
                         <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Separate multiple sizes with commas</p>
                     </div>
 
+                    <!-- Colors -->
+                    <div style="grid-column: span 2;">
+                        <label for="editProductColor" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
+                            Available Colors
+                        </label>
+                        <input type="text" id="editProductColor" name="editProductColor"
+                            placeholder="e.g., Red, Blue, Green"
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
+                            onblur="this.style.borderColor='#e5e7eb';">
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Separate multiple colors with commas</p>
+                    </div>
+
                     <!-- Product Images -->
+
                     <div style="grid-column: span 2;">
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
                             Product Images
@@ -171,6 +185,7 @@ function openEditProductModal(sku) {
   const categoryElement = document.getElementById("editProductCategory");
   const priceElement = document.getElementById("editProductPrice");
   const sizeElement = document.getElementById("editProductSize");
+  const colorElement = document.getElementById("editProductColor");
   const overlay = document.getElementById("editProductModalOverlay");
 
   if (
@@ -180,6 +195,7 @@ function openEditProductModal(sku) {
     !priceElement ||
     !overlay
   ) {
+
     console.error("Edit Product Modal elements not found in DOM");
     return;
   }
@@ -189,8 +205,10 @@ function openEditProductModal(sku) {
   categoryElement.value = product.category;
   priceElement.value = product.price;
   sizeElement.value = product.size || "";
+  colorElement.value = product.color || "";
 
   overlay.style.display = "flex";
+
 }
 
 function handleEditDragOver(event) {
@@ -292,6 +310,7 @@ function updateProduct() {
   const categoryElement = form.elements["editProductCategory"];
   const priceElement = form.elements["editProductPrice"];
   const sizeElement = form.elements["editProductSize"];
+  const colorElement = form.elements["editProductColor"];
 
   // Validate all required elements exist
   if (
@@ -300,6 +319,7 @@ function updateProduct() {
     !categoryElement ||
     !priceElement
   ) {
+
     console.error("Missing required form elements");
     alert("Form error: Missing required fields");
     return;
@@ -308,8 +328,10 @@ function updateProduct() {
   const originalSku = skuElement.value;
   const name = nameElement.value.trim();
   const category = categoryElement.value;
-  const price = priceElement.value.trim().replace("₱", "");
+  const price = priceElement.value.trim().replace(/[₱,]/g, "");
   const size = sizeElement ? sizeElement.value.trim() : "";
+  const color = colorElement ? colorElement.value.trim() : "";
+
 
   // Validate required fields
   if (!originalSku || !name || !category || !price) {
@@ -324,6 +346,8 @@ function updateProduct() {
   formData.append("category", category);
   formData.append("price", price);
   formData.append("size", size);
+  formData.append("color", color);
+
 
   // Append image files
   const imageInput = form.elements["editProductImages"];
@@ -357,7 +381,9 @@ function updateProduct() {
                 ? data.images[0]
                 : products[productIndex].image,
             size: size || "N/A",
+            color: color || "N/A",
           };
+
           products[productIndex] = updatedProduct;
           localStorage.setItem("inventoryProducts", JSON.stringify(products));
           renderProducts(products);

@@ -1,3 +1,5 @@
+<?php include '../../auth/sessionCheck.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

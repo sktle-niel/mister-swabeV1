@@ -1,11 +1,20 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+
+// Disable all error display
 ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(0);
 
+// Include files
 include '../../config/connection.php';
 require_once __DIR__ . '/../utils/skuUtils.php';
 
+
 function editProduct($data) {
+
+
     global $conn;
 
     // Sanitize inputs
@@ -41,9 +50,25 @@ function editProduct($data) {
         }
     }
 
-    $price = floatval($data['price']);
+    // Clean price value - remove currency symbol and commas
+    $priceStr = str_replace(['₱', ','], '', $data['price']);
+    $price = floatval($priceStr);
+
     $stock = intval($data['stock']);
     $size = mysqli_real_escape_string($conn, $data['size']);
+    
+    // Handle color - convert to JSON array
+    $colorInput = $data['color'] ?? '';
+    if (!empty($colorInput)) {
+        // Split by comma and trim each color
+        $colorArray = array_map('trim', explode(',', $colorInput));
+        $colorArray = array_filter($colorArray); // Remove empty values
+        $colorJson = json_encode(array_values($colorArray));
+    } else {
+        $colorJson = json_encode([]);
+    }
+    $color = mysqli_real_escape_string($conn, $colorJson);
+
 
     // SKU remains unchanged - it's readonly and cannot be edited
     // We keep the original SKU
@@ -136,9 +161,11 @@ function editProduct($data) {
         "price = $price",
         "stock = $calculatedStock",
         "size = '$size'",
+        "color = '$color'",
         "status = '$status'",
         "size_quantities = '$sizeQuantitiesJson'"
     ];
+
 
     // Only update images if new ones were uploaded
     if (!empty($images)) {
@@ -157,24 +184,49 @@ function editProduct($data) {
     } else {
         error_log('Database error: ' . $conn->error);
         error_log('SQL: ' . $sql);
-        return ['success' => false, 'message' => 'Database error: ' . $conn->error, 'debug' => ['sql' => $sql, 'error' => $conn->error]];
+        return ['success' => false, 'message' => 'Database error: ' . $conn->error];
     }
 }
 
+
 // If called directly via POST, handle it
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $data = [
-        'originalSku' => $_POST['originalSku'] ?? '',
-        'name' => $_POST['name'] ?? '',
-        'category' => $_POST['category'] ?? '',
-        'price' => $_POST['price'] ?? '',
-        'stock' => $_POST['stock'] ?? '',
-        'size' => $_POST['size'] ?? '',
-        'image' => $_POST['image'] ?? ''
-    ];
-
-    $response = editProduct($data);
-    header('Content-Type: application/json');
+    try {
+        $response = ['success' => false, 'message' => 'Unknown error'];
+        
+        // Check if required fields are present
+        if (empty($_POST['originalSku'])) {
+            $response = ['success' => false, 'message' => 'Original SKU is required'];
+        } elseif (empty($_POST['name'])) {
+            $response = ['success' => false, 'message' => 'Product name is required'];
+        } elseif (empty($_POST['category'])) {
+            $response = ['success' => false, 'message' => 'Category is required'];
+        } elseif (empty($_POST['price'])) {
+            $response = ['success' => false, 'message' => 'Price is required'];
+        } else {
+            $data = [
+                'originalSku' => $_POST['originalSku'],
+                'name' => $_POST['name'],
+                'category' => $_POST['category'],
+                'price' => $_POST['price'],
+                'stock' => '0', // Stock is calculated from size_quantities
+                'size' => $_POST['size'] ?? '',
+                'color' => $_POST['color'] ?? ''
+            ];
+            
+            $response = editProduct($data);
+        }
+    } catch (Exception $e) {
+        error_log('Edit Product Error: ' . $e->getMessage());
+        $response = ['success' => false, 'message' => 'Server error: ' . $e->getMessage()];
+    }
+    
+    // Clear buffer and output JSON
+    ob_end_clean();
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode($response);
+    exit;
 }
+
+
 ?>

@@ -4,7 +4,7 @@ include '../../config/connection.php';
 function fetchProducts() {
     global $conn;
 
-    $sql = "SELECT i.id, i.name, i.sku, i.category, i.price, i.stock, i.size, i.images, i.status, i.size_quantities FROM inventory i ORDER BY i.id DESC";
+    $sql = "SELECT i.id, i.name, i.sku, i.category, i.price, i.stock, i.size, i.images, i.status, i.size_quantities, i.color FROM inventory i ORDER BY i.id DESC";
     $result = $conn->query($sql);
 
     $products = [];
@@ -33,10 +33,13 @@ function fetchProducts() {
                 'stock' => $calculated_stock,
                 'size' => $row['size'] ?: 'N/A',
                 'size_quantities' => $row['size_quantities'],
+                'color' => $row['color'] ? str_replace(['"', '[', ']'], '', $row['color']) : 'N/A',
+
                 'image' => $adjustedImages[0] ?? 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90', // Use first image as main image
                 'images' => $adjustedImages, // Keep all images with adjusted paths
                 'status' => $row['status']
             ];
+
         }
     }
 
