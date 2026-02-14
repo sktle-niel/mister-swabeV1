@@ -53,12 +53,12 @@ function renderProducts(productsToRender) {
                 <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px; border-radius: var(--radius-md); object-fit: cover; cursor: pointer;" onclick="previewImage('${product.image}')">
             </td>
             <td style="font-weight: 600; color: var(--text-primary);">${product.name}</td>
-            <td style="color: var(--text-muted); font-size: 0.875rem;">${product.sku}</td>
             <td><span class="badge badge-info">${product.category}</span></td>
             <td style="font-weight: 600;">${product.price}</td>
             <td style="${stockClass ? `color: ${stockClass}; font-weight: 600;` : ""}">${product.stock}</td>
             <td>${product.size || "N/A"}</td>
             <td style="font-size: 0.875rem;">${sizeQuantitiesDisplay}</td>
+            <td style="font-size: 0.875rem;">${product.color || "N/A"}</td>
             <td><span class="badge ${statusClass}">${product.status}</span></td>
             <td>
                 <div style="display: flex; gap: var(--spacing-xs);">
@@ -494,6 +494,7 @@ function addProduct() {
   const category = document.getElementById("productCategory").value;
   const price = document.getElementById("productPrice").value.trim();
   const sizesInput = document.getElementById("productSizes").value.trim();
+  const colorsInput = document.getElementById("productColors").value.trim();
   const selectedSizes = sizesInput
     ? sizesInput
         .split(",")
@@ -517,6 +518,7 @@ function addProduct() {
   formData.append("productCategory", category);
   formData.append("productPrice", price);
   formData.append("productSizes", sizesInput);
+  formData.append("productColors", colorsInput);
 
   // Append image files
   for (let i = 0; i < imageFiles.length; i++) {
@@ -551,7 +553,9 @@ function addProduct() {
               : "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90",
           size: sizesInput || "N/A",
           size_quantities: data.size_quantities,
+          color: colorsInput || "N/A",
         };
+
         products.push(newProduct);
         localStorage.setItem("inventoryProducts", JSON.stringify(products));
         filterProducts();

@@ -1,5 +1,6 @@
 <?php
 include 'components/skuScanner.php';
+include '../../auth/sessionCheck.php';
 ?>
 <div class="main-content">
     <div class="content-header">

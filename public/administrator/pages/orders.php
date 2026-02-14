@@ -1,5 +1,7 @@
 to<?php
 require_once '../../config/connection.php';
+include '../../auth/sessionCheck.php';
+
 
 // Query total orders
 $totalOrdersQuery = "SELECT COUNT(*) as total FROM sales";

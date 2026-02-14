@@ -1,4 +1,7 @@
 <?php
+include '../../auth/sessionCheck.php';
+
+
 $modalId = 'deleteCategoryModal';
 $title = 'Delete Category';
 $message = 'Are you sure you want to delete this category? This action cannot be undone.';

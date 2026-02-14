@@ -15,6 +15,8 @@ include '../../back-end/create/addProduct.php';
 include '../../back-end/read/fetchProduct.php';
 include '../../back-end/update/editProduct.php';
 include '../../back-end/delete/removeProduct.php';
+include '../../auth/sessionCheck.php';
+
 
 // Fetch products from database
 $products = fetchProducts();
@@ -69,6 +71,18 @@ $recentProduct = !empty($products) ? $products[0] : null;
                             <option value="">Select Category</option>
                             <!-- Categories will be loaded dynamically -->
                         </select>
+                    </div>
+
+                    <!-- Colors -->
+                    <div style="grid-column: span 2;">
+                        <label for="productColors" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
+                            Available Colors
+                        </label>
+                        <input type="text" id="productColors" name="productColors" placeholder="Enter colors separated by commas (e.g., Red, Blue, Green)"
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
+                            onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"
+                            onblur="this.style.borderColor='#e5e7eb';">
+                        <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">Enter colors separated by commas</p>
                     </div>
 
                     <!-- Price -->
@@ -238,16 +252,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         <tr>
                             <th>Product</th>
                             <th>Product Name</th>
-                            <th>SKU</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Size</th>
                             <th>Size Quantity</th>
+                            <th>Color</th>
                             <th>Status</th>
+
                             <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody id="products-tbody">
                     </tbody>
                 </table>

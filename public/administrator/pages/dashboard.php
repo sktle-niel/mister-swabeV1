@@ -1,4 +1,6 @@
 <?php
+include '../../auth/sessionCheck.php';
+
 require_once '../../config/connection.php';
 
 // Function to get total products

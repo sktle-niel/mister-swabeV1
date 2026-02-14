@@ -8,6 +8,7 @@
 
 <?php
 include '../../back-end/read/fetchProduct.php';
+include '../../auth/sessionCheck.php';
 
 // Fetch products from database
 $products = fetchProducts();

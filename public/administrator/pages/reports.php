@@ -1,5 +1,6 @@
 <?php
 require_once '../../config/connection.php';
+include '../../auth/sessionCheck.php';
 
 // Query today's total sales
 $todaySalesQuery = "SELECT SUM(total_amount) as total FROM sales WHERE DATE(created_at) = CURDATE()";

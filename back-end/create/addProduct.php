@@ -43,6 +43,15 @@ function addProduct($data) {
     }
     $sizeQuantitiesJson = json_encode($sizeQuantities);
     
+    // Handle color - create JSON array from comma-separated input
+    $colorInput = isset($_POST['productColors']) ? trim($_POST['productColors']) : '';
+    $colorData = [];
+    if (!empty($colorInput)) {
+        $colorData = array_map('trim', explode(',', $colorInput));
+        $colorData = array_filter($colorData, function($color) { return !empty($color); });
+    }
+    $colorJson = json_encode($colorData);
+    
     // Generate SKU automatically
     $sku = generateSKU($name, $category, $data['price'], $sizeData);
     
@@ -117,8 +126,8 @@ function addProduct($data) {
 
     // Insert query
     $imagesJson = json_encode($images);
-    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, size_quantities, images, status)
-            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$sizeString', '$sizeQuantitiesJson', '$imagesJson', '$status')";
+    $sql = "INSERT INTO inventory (id, name, sku, category, price, stock, size, size_quantities, color, images, status)
+            VALUES ('$id', '$name', '$sku', '$category', $price, $stock, '$sizeString', '$sizeQuantitiesJson', '$colorJson', '$imagesJson', '$status')";
 
     if ($conn->query($sql) === TRUE) {
         return ['success' => true, 'message' => 'Product added successfully', 'id' => $id, 'sku' => $sku, 'images' => $images, 'stock' => $stock, 'size_quantities' => $sizeQuantities];
