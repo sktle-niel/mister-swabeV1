@@ -99,9 +99,18 @@ $recentProduct = !empty($products) ? $products[0] : null;
 
                     <!-- Size -->
                     <div style="grid-column: span 2;">
+                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span style="font-size: 13px; color: #92400e; font-weight: 500;">Important: If the product has no required size, put (Not Required)</span>
+                        </div>
                         <label for="productSizes" style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #374151;">
                             Available Sizes
                         </label>
+
                         <input type="text" id="productSizes" name="productSizes" placeholder="Enter sizes separated by commas (e.g., S,M,L,XL)"
                             style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; box-sizing: border-box; transition: all 0.2s;"
                             onfocus="this.style.borderColor='#3b82f6'; this.style.outline='none';"

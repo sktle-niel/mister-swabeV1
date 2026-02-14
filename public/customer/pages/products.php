@@ -21,7 +21,8 @@
 
     foreach ($products as $productIndex => $product) {
       $hiddenClass = $productIndex >= 12 ? ' hidden' : '';
-      echo '<div class="product-card' . $hiddenClass . '" onclick="openModal(this)" data-name="' . htmlspecialchars($product['name']) . '" data-price="' . htmlspecialchars($product['price']) . '" data-image="' . htmlspecialchars($product['image']) . '" data-sizes="' . htmlspecialchars($product['sizes'] ?? '') . '">';
+      echo '<div class="product-card' . $hiddenClass . '" onclick="openModal(this)" data-name="' . htmlspecialchars($product['name']) . '" data-price="' . htmlspecialchars($product['price']) . '" data-image="' . htmlspecialchars($product['image']) . '" data-sizes="' . htmlspecialchars($product['sizes'] ?? '') . '" data-colors="' . htmlspecialchars($product['colors'] ?? '') . '" data-size-quantities="' . htmlspecialchars($product['size_quantities'] ?? '{}') . '">';
+
       echo '<img src="' . $product['image'] . '" class="product-image" alt="Product" />';
       echo '<div class="product-info">';
       echo '<p class="product-brand">' . $product['brand'] . '</p>';

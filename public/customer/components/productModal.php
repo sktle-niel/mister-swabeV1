@@ -12,17 +12,6 @@
                     class="main-image"
                     id="mainImage"
                 >
-                <div class="thumbnail-list">
-                    <div class="thumbnail active">
-                        <img src="https://via.placeholder.com/70x70/f5f5f5/333333?text=1" alt="View 1">
-                    </div>
-                    <div class="thumbnail">
-                        <img src="https://via.placeholder.com/70x70/e8e8e8/333333?text=2" alt="View 2">
-                    </div>
-                    <div class="thumbnail">
-                        <img src="https://via.placeholder.com/70x70/e0e0e0/333333?text=3" alt="View 3">
-                    </div>
-                </div>
             </div>
 
             <!-- Right Side - Product Info -->
@@ -34,13 +23,11 @@
                 <!-- Color Selection -->
                 <div class="color-section">
                     <label class="section-label">Color</label>
-                    <div class="color-options">
-                        <button class="color-option" onclick="selectColor(this)">White</button>
-                        <button class="color-option" onclick="selectColor(this)">Blush Pink</button>
-                        <button class="color-option" onclick="selectColor(this)">Sky Blue</button>
-                        <button class="color-option" onclick="selectColor(this)">Sunshine Yellow</button>
+                    <div class="color-options" id="colorOptions">
+                        <!-- Color options will be populated dynamically -->
                     </div>
                 </div>
+
 
                 <!-- Size Selection -->
                 <div class="size-section">
@@ -70,4 +57,25 @@
     </div>
 </div>
 
+<style>
+.size-qty {
+    display: block;
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+    font-weight: normal;
+}
+
+.size-option.out-of-stock {
+    background-color: #f5f5f5;
+    color: #999;
+    border-color: #ddd;
+}
+
+.size-option.selected {
+    background-color: #000;
+    color: #fff;
+    border-color: #000;
+}
+</style>
 <script src="../../../src/js/modal.js"></script>

@@ -49,61 +49,24 @@
     <p class="section-subtitle">Explore our diverse collection of fashion items</p>
   </div>
   <div class="category-banners">
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=shoes'">
-      <img
-        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&h=350&fit=crop&q=90"
-        alt="Shoes"
-      />
-      <div class="category-banner-overlay">
-        <h3>SHOES</h3>
-      </div>
-    </div>
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=shirts'">
-      <img
-        src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=700&h=350&fit=crop&q=90"
-        alt="Shirts"
-      />
-      <div class="category-banner-overlay">
-        <h3>SHIRTS</h3>
-      </div>
-    </div>
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=accessories'">
-      <img
-        src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=700&h=350&fit=crop&q=90"
-        alt="Accessories"
-      />
-      <div class="category-banner-overlay">
-        <h3>ACCESSORIES</h3>
-      </div>
-    </div>
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=collections'">
-      <img
-        src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700&h=350&fit=crop&q=90"
-        alt="Collections"
-      />
-      <div class="category-banner-overlay">
-        <h3>COLLECTIONS</h3>
-      </div>
-    </div>
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=sale'">
-      <img
-        src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=700&h=350&fit=crop&q=90"
-        alt="Sale"
-      />
-      <div class="category-banner-overlay">
-        <h3>SALE</h3>
-      </div>
-    </div>
-    <div class="category-banner" onclick="window.location.href='main.php?page=products&category=new-arrivals'">
-      <img
-        src="https://images.unsplash.com/photo-1515347619252-60a4bf4fff4f?w=700&h=350&fit=crop&q=90"
-        alt="New Arrivals"
-      />
-      <div class="category-banner-overlay">
-        <h3>NEW ARRIVALS</h3>
-      </div>
-    </div>
+    <?php
+    include '../../back-end/read/fetchCategoriesWithImages.php';
+    $categories = fetchCategoriesWithImages($conn);
+    
+    foreach ($categories as $category) {
+        $categoryName = htmlspecialchars($category['name']);
+        $categoryImage = htmlspecialchars($category['image']);
+        $categoryUrl = 'main.php?page=products&category=' . urlencode(strtolower($category['name']));
+        echo '<div class="category-banner" onclick="window.location.href=\'' . $categoryUrl . '\'">';
+        echo '<img src="' . $categoryImage . '" alt="' . $categoryName . '" />';
+        echo '<div class="category-banner-overlay">';
+        echo '<h3>' . strtoupper($categoryName) . '</h3>';
+        echo '</div>';
+        echo '</div>';
+    }
+    ?>
   </div>
+
 
   <!-- Featured Products -->
   <section class="featured-products">
@@ -120,7 +83,10 @@
       $productIndex = 0;
       foreach ($products as $product) {
         $hiddenClass = $productIndex >= 12 ? ' hidden' : '';
-        echo '<div class="product-card' . $hiddenClass . '" onclick="openModal(this)" data-name="' . htmlspecialchars($product['name']) . '" data-price="' . htmlspecialchars($product['price']) . '" data-image="' . htmlspecialchars($product['image']) . '" data-sizes="' . htmlspecialchars($product['sizes']) . '">';
+        echo '<div class="product-card' . $hiddenClass . '" onclick="openModal(this)" data-name="' . htmlspecialchars($product['name']) . '" data-price="' . htmlspecialchars($product['price']) . '" data-image="' . htmlspecialchars($product['image']) . '" data-sizes="' . htmlspecialchars($product['sizes']) . '" data-colors="' . htmlspecialchars($product['colors']) . '" data-size-quantities="' . htmlspecialchars($product['size_quantities']) . '">';
+
+
+
         echo '<img src="' . $product['image'] . '" class="product-image" alt="Product" />';
         echo '<div class="product-info">';
         echo '<p class="product-brand">' . $product['brand'] . '</p>';

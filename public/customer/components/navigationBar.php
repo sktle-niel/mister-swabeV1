@@ -71,19 +71,6 @@ if ($result->num_rows > 0) {
           <path d="m21 21-4.35-4.35"></path>
         </svg>
       </a>
-      <a href="../../../auth/form.php" class="icon-link" title="Account">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-      </a>
       <a href="#" class="icon-link" title="Cart">
         <svg
           width="20"
