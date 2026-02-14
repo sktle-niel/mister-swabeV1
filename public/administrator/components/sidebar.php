@@ -1,6 +1,6 @@
 <aside class="admin-panel">
     <div class="panel-header">
-        <div class="panel-logo">S</div>
+        <div class="panel-logo"><img src="../../src/img/swabe.png" alt="Logo" style="width: 60px; height: 60px;"></div>
         <div class="panel-title">Admin Panel</div>
     </div>
     
@@ -84,16 +84,7 @@
             </span>
             Reports
         </a>
-        
-        <a href="?page=settings" class="nav-item <?php echo ($currentPage == 'settings') ? 'active' : ''; ?>">
-            <span class="nav-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6m0 6v6m6-12v6m-6 0v6m-6-12v6m6 0v6"></path>
-                </svg>
-            </span>
-            Settings
-        </a>
+
     </nav>
     
     <div class="panel-footer">
@@ -102,7 +93,18 @@
             <p class="help-text">Check our documentation</p>
             <button class="help-button">View Docs</button>
         </div>
+        <a href="../../auth/logout.php" class="nav-item"  style="margin-top: 20px;">
+            <span class="nav-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16,17 21,12 16,7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </span>
+            Logout
+        </a>
     </div>
+    
 </aside>
 
 <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">

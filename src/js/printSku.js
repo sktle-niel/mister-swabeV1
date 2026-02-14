@@ -45,12 +45,16 @@ function renderProducts(productsToRender) {
 function filterProducts() {
   const searchFilter = document
     .getElementById("search-filter")
-    .value.toLowerCase();
-  const categoryFilter = document.getElementById("category-filter").value;
-  const statusFilter = document.getElementById("status-filter").value;
+    .value.toLowerCase()
+    .trim();
+  const categoryFilter = document
+    .getElementById("category-filter")
+    .value.toLowerCase()
+    .trim();
 
   let filteredProducts = products;
 
+  // Filter by search term (name or SKU)
   if (searchFilter) {
     filteredProducts = filteredProducts.filter(
       (product) =>
@@ -59,20 +63,11 @@ function filterProducts() {
     );
   }
 
+  // Filter by category
   if (categoryFilter) {
     filteredProducts = filteredProducts.filter(
-      (product) => product.category.toLowerCase() === categoryFilter,
-    );
-  }
-
-  if (statusFilter) {
-    const statusMap = {
-      "in-stock": "In Stock",
-      "low-stock": "Low Stock",
-      "out-of-stock": "Out of Stock",
-    };
-    filteredProducts = filteredProducts.filter(
-      (product) => product.status === statusMap[statusFilter],
+      (product) =>
+        product.category && product.category.toLowerCase() === categoryFilter,
     );
   }
 
@@ -83,7 +78,6 @@ function filterProducts() {
 function clearFilters() {
   document.getElementById("search-filter").value = "";
   document.getElementById("category-filter").value = "";
-  document.getElementById("status-filter").value = "";
   renderProducts(products);
   generateBarcodes(products);
 }
@@ -544,14 +538,12 @@ document.addEventListener("DOMContentLoaded", () => {
   generateBarcodes(products);
   updatePrintBarcodeContainer();
 
+  // Add event listeners for filters
   document
     .getElementById("search-filter")
     .addEventListener("input", filterProducts);
   document
     .getElementById("category-filter")
-    .addEventListener("change", filterProducts);
-  document
-    .getElementById("status-filter")
     .addEventListener("change", filterProducts);
 
   const activitySearch = document.getElementById("activity-search");
