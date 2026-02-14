@@ -62,7 +62,7 @@ try {
     }
 
     // Update inventory stock for each sold product
-    $stmt_update = $conn->prepare("UPDATE inventory SET size_quantities = ? WHERE id = ?");
+    $stmt_update = $conn->prepare("UPDATE inventory SET size_quantities = ?, stock = ? WHERE id = ?");
     foreach ($products as $product) {
         $product_id = $product['id'] ?? 0;
         $quantity = $product['quantity'] ?? 0;
@@ -83,9 +83,12 @@ try {
                     $size_quantities[$size] = max(0, $size_quantities[$size] - $quantity);
                 }
 
-                // Update the size_quantities in inventory
+                // Calculate total stock from size_quantities
+                $total_stock = array_sum($size_quantities);
+
+                // Update the size_quantities and stock in inventory
                 $updated_quantities = json_encode($size_quantities);
-                $stmt_update->bind_param("si", $updated_quantities, $product_id);
+                $stmt_update->bind_param("sii", $updated_quantities, $total_stock, $product_id);
                 $stmt_update->execute();
             }
             $stmt_fetch->close();
