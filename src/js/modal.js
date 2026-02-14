@@ -4,11 +4,50 @@ function openModal(card) {
   const price = card.getAttribute("data-price");
   const image = card.getAttribute("data-image");
   const sizes = card.getAttribute("data-sizes");
+  const colors = card.getAttribute("data-colors");
+  const sizeQuantities = card.getAttribute("data-size-quantities");
 
   document.getElementById("productTitle").textContent = name;
   document.getElementById("productPrice").textContent = price;
   document.getElementById("mainImage").src = image;
   document.getElementById("mainImage").alt = name;
+
+  // Parse size quantities JSON
+  let sizeQtyMap = {};
+  if (sizeQuantities) {
+    try {
+      sizeQtyMap = JSON.parse(sizeQuantities);
+    } catch (e) {
+      console.log("Error parsing size_quantities:", e);
+    }
+  }
+
+  // Handle color section visibility and population
+  const colorSection = document.querySelector(".color-section");
+  const colorOptionsContainer = document.getElementById("colorOptions");
+
+  if (colors && colors.trim() !== "") {
+    colorSection.style.display = "block"; // Show color section
+    colorOptionsContainer.innerHTML = ""; // Clear existing options
+
+    const colorArray = colors.split(",");
+    colorArray.forEach((color, index) => {
+      const colorButton = document.createElement("button");
+      colorButton.className = "color-option";
+      colorButton.textContent = color.trim();
+      colorButton.onclick = function () {
+        selectColor(this);
+      };
+      colorOptionsContainer.appendChild(colorButton);
+
+      // Auto-select first color option
+      if (index === 0) {
+        selectColor(colorButton);
+      }
+    });
+  } else {
+    colorSection.style.display = "none"; // Hide color section if no colors
+  }
 
   // Handle size section visibility and population
   const sizeSection = document.querySelector(".size-section");
@@ -20,16 +59,32 @@ function openModal(card) {
 
     const sizeArray = sizes.split(",");
     sizeArray.forEach((size, index) => {
+      const sizeTrimmed = size.trim();
+      const quantity =
+        sizeQtyMap[sizeTrimmed] !== undefined ? sizeQtyMap[sizeTrimmed] : 0;
+
       const sizeButton = document.createElement("button");
-      sizeButton.className = "size-option";
-      sizeButton.textContent = size.trim();
+      sizeButton.className =
+        "size-option" + (quantity <= 0 ? " out-of-stock" : "");
+      sizeButton.innerHTML =
+        sizeTrimmed + '<span class="size-qty">(' + quantity + ")</span>";
       sizeButton.onclick = function () {
-        selectSize(this);
+        if (quantity > 0) {
+          selectSize(this);
+        }
       };
+
+      // Disable button if out of stock
+      if (quantity <= 0) {
+        sizeButton.disabled = true;
+        sizeButton.style.opacity = "0.5";
+        sizeButton.style.cursor = "not-allowed";
+      }
+
       sizeOptionsContainer.appendChild(sizeButton);
 
-      // Auto-select first size option
-      if (index === 0) {
+      // Auto-select first size option with stock
+      if (index === 0 && quantity > 0) {
         selectSize(sizeButton);
       }
     });
@@ -38,12 +93,6 @@ function openModal(card) {
   }
 
   document.getElementById("modalOverlay").style.display = "flex";
-
-  // Auto-select first color option
-  const firstColorOption = document.querySelector(".color-option");
-  if (firstColorOption) {
-    selectColor(firstColorOption);
-  }
 }
 
 function closeModal() {

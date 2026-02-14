@@ -386,7 +386,7 @@ function updateProduct() {
 
           products[productIndex] = updatedProduct;
           localStorage.setItem("inventoryProducts", JSON.stringify(products));
-          renderProducts(products);
+          filterProducts();
         }
 
         // Show success message

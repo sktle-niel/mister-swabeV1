@@ -2,7 +2,8 @@
 function getProducts($category = 'all', $search = '') {
     include '../../config/connection.php';
 
-    $query = "SELECT id, name, sku, category, price, stock, size, images, status FROM inventory WHERE 1";
+    $query = "SELECT id, name, sku, category, price, stock, size, images, status, color, size_quantities FROM inventory WHERE 1";
+
     $result = $conn->query($query);
     $products = [];
     if ($result->num_rows > 0) {
@@ -16,14 +17,26 @@ function getProducts($category = 'all', $search = '') {
                 return '../../' . $img; // From public/customer/pages/ to uploads/
             }, $images);
 
+            // Decode colors JSON
+            $colors = $row['color'] ?: '';
+            if ($colors) {
+                $colorsArray = json_decode($colors, true);
+                if (is_array($colorsArray)) {
+                    $colors = implode(', ', $colorsArray);
+                }
+            }
+
             $products[] = [
                 'image' => $adjustedImages[0] ?? 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90',
                 'brand' => ucfirst($row['category']),
                 'name' => $row['name'],
                 'price' => '₱' . number_format($row['price'], 0, '.', ','),
                 'sizes' => $row['size'],
-                'category' => $row['category']
+                'category' => $row['category'],
+                'colors' => $colors,
+                'size_quantities' => $row['size_quantities'] ?: '{}'
             ];
+
         }
     }
 

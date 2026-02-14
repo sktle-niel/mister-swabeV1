@@ -108,7 +108,27 @@
 
         cartHTML += '</div>';
 
+        // Calculate total amount
+        let totalAmount = 0;
+        cart.forEach(item => {
+            const priceMatch = item.price.match(/₱([\d,]+)/);
+            const price = priceMatch ? parseFloat(priceMatch[1].replace(',', '')) : 0;
+            totalAmount += price * item.quantity;
+        });
+
+        // Add cart footer with total
+        cartHTML += `
+            <div class="cart-footer">
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Total Amount:</span>
+                    <span class="cart-total-amount">₱${totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                </div>
+            </div>
+        `;
+
         cartContent.innerHTML = cartHTML;
+
+
     }
 
     // Function to update item quantity
@@ -158,4 +178,54 @@
             loadCartContent();
         }
     }
+
 </script>
+
+
+<style>
+    .cart-sidebar {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .cart-content-container {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-items {
+        flex: 1;
+        padding-bottom: 20px;
+    }
+
+    .cart-footer {
+        border-top: 2px solid #e5e7eb;
+        background: #ffffff;
+        padding: 20px;
+        margin-top: auto;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .cart-total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .cart-total-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .cart-total-amount {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+</style>

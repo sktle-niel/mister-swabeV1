@@ -4,7 +4,8 @@ include '../../config/connection.php';
 function fetchHomeProducts() {
     global $conn;
 
-    $sql = "SELECT `id`, `name`, `sku`, `category`, `price`, `stock`, `size`, `images`, `status`, `size_quantities` FROM `inventory` WHERE 1";
+    $sql = "SELECT `id`, `name`, `sku`, `category`, `price`, `stock`, `size`, `images`, `status`, `size_quantities`, `color` FROM `inventory` WHERE 1";
+
     $result = $conn->query($sql);
 
     $products = [];
@@ -20,13 +21,27 @@ function fetchHomeProducts() {
                 return '../../../' . $img; // From public/customer/pages/ to uploads/
             }, $images);
 
+            // Decode colors JSON
+            $colors = $row['color'] ?: '';
+            if ($colors) {
+                $colorsArray = json_decode($colors, true);
+                if (is_array($colorsArray)) {
+                    $colors = implode(', ', $colorsArray);
+                }
+            }
+
             $products[] = [
                 'image' => $adjustedImages[0] ?? 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&q=90', // Use first image as main image
                 'brand' => $row['category'],
                 'name' => $row['name'],
                 'price' => '₱' . number_format($row['price'], 2),
-                'sizes' => $row['size'] ?: ''
+                'sizes' => $row['size'] ?: '',
+                'colors' => $colors,
+                'size_quantities' => $row['size_quantities'] ?: '{}'
             ];
+
+
+
         }
     }
 
