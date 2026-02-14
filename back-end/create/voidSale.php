@@ -44,8 +44,13 @@ try {
     }
 
     $inserted_count = 0;
+    $sale_items = [];
+    
     // Step 2: Save each sale item to void_products table (BEFORE deleting)
     while ($row = $check_result->fetch_assoc()) {
+        // Store sale items for restoring inventory
+        $sale_items[] = $row;
+        
         $random_id = rand(1000000, 9999999); // Generate 7-digit random ID
         $insert_stmt->bind_param("iisisss",
             $random_id,
@@ -67,6 +72,44 @@ try {
         throw new Exception('No records were inserted into void_products');
     }
     $check_stmt->close();
+    
+    // Step 2.5: Restore size quantities back to inventory
+    $restore_sql = "UPDATE inventory SET size_quantities = ? WHERE id = ?";
+    $restore_stmt = $conn->prepare($restore_sql);
+    
+    foreach ($sale_items as $item) {
+        $product_id = $item['product_id'];
+        $quantity = $item['quantity'];
+        $size = $item['size'];
+        
+        if ($size && $size !== 'N/A') {
+            // Fetch current size_quantities
+            $fetch_sql = "SELECT size_quantities FROM inventory WHERE id = ?";
+            $fetch_stmt = $conn->prepare($fetch_sql);
+            $fetch_stmt->bind_param("i", $product_id);
+            $fetch_stmt->execute();
+            $fetch_result = $fetch_stmt->get_result();
+            
+            if ($fetch_result->num_rows > 0) {
+                $fetch_row = $fetch_result->fetch_assoc();
+                $size_quantities = json_decode($fetch_row['size_quantities'] ?? '{}', true);
+                
+                // Add the voided quantity back to the size
+                if (isset($size_quantities[$size])) {
+                    $size_quantities[$size] = $size_quantities[$size] + $quantity;
+                } else {
+                    $size_quantities[$size] = $quantity;
+                }
+                
+                // Update the size_quantities in inventory
+                $updated_quantities = json_encode($size_quantities);
+                $restore_stmt->bind_param("si", $updated_quantities, $product_id);
+                $restore_stmt->execute();
+            }
+            $fetch_stmt->close();
+        }
+    }
+    $restore_stmt->close();
     
     // Step 3: Delete from sale_items (after saving to void_products)
     $delete_items_sql = "DELETE FROM sale_items WHERE sale_id = ?";

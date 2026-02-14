@@ -53,7 +53,7 @@ function getTotalOrders() {
 // Function to get active customers
 function getActiveCustomers() {
     global $conn;
-    $query = "SELECT COUNT(*) as total FROM users WHERE user_type = 'customer' AND status = 'active'";
+    $query = "SELECT COUNT(*) as total FROM users WHERE user_type = 'customer'";
     $result = $conn->query($query);
     $row = $result->fetch_assoc();
     return $row['total'] ?? 0;
@@ -124,31 +124,8 @@ $categoryValues = json_encode(array_column($categoryData, 'total'));
     <div class="content-header">
         <div class="header-top">
             <div>
-                <h1 class="brand-title">SWABE COLLECTION</h1>
+                <h1 class="brand-title">SWABE APPAREL AND COLLECTION</h1>
                 <p class="brand-subtitle">Inventory Management</p>
-            </div>
-            <div class="header-actions">
-                <div class="search-bar">
-                    <span class="search-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <path d="m21 21-4.35-4.35"></path>
-                        </svg>
-                    </span>
-                    <input type="search" class="search-input" placeholder="Search products, SKU, categories...">
-                </div>
-                <button class="btn btn-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-                    </svg>
-                </button>
-                <button class="btn btn-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                </button>
             </div>
         </div>
         
@@ -229,9 +206,6 @@ $categoryValues = json_encode(array_column($categoryData, 'total'));
             <div class="chart-header">
                 <h3 class="chart-title">Sales Overview</h3>
                 <div class="chart-actions">
-                    <button class="chart-filter active">6M</button>
-                    <button class="chart-filter">1Y</button>
-                    <button class="chart-filter">All</button>
                 </div>
             </div>
             <div class="chart-container">
@@ -243,7 +217,6 @@ $categoryValues = json_encode(array_column($categoryData, 'total'));
             <div class="chart-header">
                 <h3 class="chart-title">Sales by Category</h3>
                 <div class="chart-actions">
-                    <button class="chart-filter active">This Month</button>
                 </div>
             </div>
             <div class="chart-container">

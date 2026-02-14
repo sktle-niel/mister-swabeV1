@@ -2,7 +2,7 @@
 function fetchCustomers() {
     include '../../config/connection.php';
 
-    $query = "SELECT id, email, password, user_type, created_at, status FROM users WHERE user_type = 'customer'";
+    $query = "SELECT id, email, password, user_type, created_at FROM users WHERE 1";
     $result = $conn->query($query);
     $customers = [];
     if ($result->num_rows > 0) {
@@ -16,7 +16,7 @@ function fetchCustomers() {
 function getTotalCustomers() {
     include '../../config/connection.php';
 
-    $query = "SELECT COUNT(*) as total FROM users WHERE user_type = 'customer'";
+    $query = "SELECT COUNT(*) as total FROM users WHERE 1";
     $result = $conn->query($query);
     $row = $result->fetch_assoc();
     return $row['total'];
@@ -25,7 +25,7 @@ function getTotalCustomers() {
 function getActiveCustomers() {
     include '../../config/connection.php';
 
-    $query = "SELECT COUNT(*) as active FROM users WHERE user_type = 'customer'";
+    $query = "SELECT COUNT(*) as active FROM users WHERE 1";
     $result = $conn->query($query);
     $row = $result->fetch_assoc();
     return $row['active'];
@@ -34,7 +34,7 @@ function getActiveCustomers() {
 function getInactiveCustomers() {
     include '../../config/connection.php';
 
-    $query = "SELECT COUNT(*) as inactive FROM users WHERE user_type = 'customer' AND status = 'inactive'";
+    $query = "SELECT COUNT(*) as inactive FROM users WHERE 1";
     $result = $conn->query($query);
     $row = $result->fetch_assoc();
     return $row['inactive'];

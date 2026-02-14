@@ -1,9 +1,6 @@
 <?php
 include '../../back-end/read/fetchCustomers.php';
 $customers = fetchCustomers();
-$totalCustomers = getTotalCustomers();
-$activeCustomers = getActiveCustomers();
-$inactiveCustomers = getInactiveCustomers();
 ?>
 
 <div class="main-content">

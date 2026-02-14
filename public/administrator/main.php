@@ -18,6 +18,7 @@
     <?php include 'components/sidebar.php'; ?>
     <?php include 'status/successStatus.php'; ?>
     <?php include 'status/invalidStatus.php'; ?>
+    <?php require_once '../../back-end/helpers/autoReportTrigger.php'; ?>
 
     <?php
     $currentPage = isset($_GET['page']) ? $_GET['page'] : 'dashboard';

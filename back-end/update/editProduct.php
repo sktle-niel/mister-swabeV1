@@ -94,10 +94,36 @@ function editProduct($data) {
         }
     }
 
-    // Determine status
-    if ($stock == 0) {
+    // Handle size_quantities - remove sizes that are no longer in the new size list
+    $fetchSql = "SELECT size_quantities FROM inventory WHERE sku = '$originalSku'";
+    $fetchResult = $conn->query($fetchSql);
+    
+    $updatedSizeQuantities = [];
+    if ($fetchResult && $fetchResult->num_rows > 0) {
+        $row = $fetchResult->fetch_assoc();
+        $currentSizeQuantities = json_decode($row['size_quantities'] ?? '{}', true);
+        
+        // Parse new sizes from form
+        $newSizes = array_map('trim', explode(',', $size));
+        $newSizes = array_filter($newSizes);
+        
+        // Remove sizes from size_quantities that are not in the new size list
+        foreach ($currentSizeQuantities as $sizeKey => $qty) {
+            if (in_array($sizeKey, $newSizes)) {
+                $updatedSizeQuantities[$sizeKey] = $qty;
+            }
+        }
+    }
+    
+    $sizeQuantitiesJson = json_encode($updatedSizeQuantities);
+
+    // Calculate stock from size_quantities
+    $calculatedStock = array_sum($updatedSizeQuantities);
+
+    // Determine status based on calculated stock
+    if ($calculatedStock == 0) {
         $status = 'Out of Stock';
-    } elseif ($stock <= 10) {
+    } elseif ($calculatedStock <= 10) {
         $status = 'Low Stock';
     } else {
         $status = 'In Stock';
@@ -108,9 +134,10 @@ function editProduct($data) {
         "name = '$name'",
         "category = '$categoryName'",
         "price = $price",
-        "stock = $stock",
+        "stock = $calculatedStock",
         "size = '$size'",
-        "status = '$status'"
+        "status = '$status'",
+        "size_quantities = '$sizeQuantitiesJson'"
     ];
 
     // Only update images if new ones were uploaded

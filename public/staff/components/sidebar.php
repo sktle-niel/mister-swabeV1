@@ -1,6 +1,6 @@
-dd<aside class="admin-panel">
+<aside class="admin-panel">
     <div class="panel-header">
-        <div class="panel-logo">S</div>
+        <div class="panel-logo"><img src="../../src/img/swabe.png" alt="Logo" style="width: 60px; height: 60px;"></div>
         <div class="panel-title">Admin Panel</div>
     </div>
     
